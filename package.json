@@ -1,0 +1,25 @@
+{
+  "name": "cordova-plugin-faceme",
+  "version": "1.0.0",
+  "description": "Cordova FaceMe Plugin",
+  "cordova": {
+    "id": "inc.bastion.faceme",
+    "platforms": [
+      "android"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marhano/cordova_plugin_faceme.git"
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-android"
+  ],
+  "author": "marhano",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/marhano/cordova_plugin_faceme/issues"
+  },
+  "homepage": "https://github.com/marhano/cordova_plugin_faceme#readme"
+}
