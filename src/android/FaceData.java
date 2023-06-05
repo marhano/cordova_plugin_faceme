@@ -1,4 +1,4 @@
-package com.example.faceme;
+package inc.bastion.faceme;
 
 public class FaceData {
     public long collectionId = -1;

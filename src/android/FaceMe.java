@@ -12,14 +12,35 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.cyberlink.faceme.DetectionMode;
+import com.cyberlink.faceme.DetectionModelSpeedLevel;
+import com.cyberlink.faceme.DetectionOutputOrder;
+import com.cyberlink.faceme.DetectionSpeedLevel;
+import com.cyberlink.faceme.EnginePreference;
+import com.cyberlink.faceme.ExtractConfig;
+import com.cyberlink.faceme.ExtractionModelSpeedLevel;
+import com.cyberlink.faceme.ExtractionOption;
+import com.cyberlink.faceme.FaceAttribute;
+import com.cyberlink.faceme.FaceFeature;
+import com.cyberlink.faceme.FaceFeatureScheme;
+import com.cyberlink.faceme.FaceInfo;
+import com.cyberlink.faceme.FaceLandmark;
+import com.cyberlink.faceme.FaceMeDataManager;
+import com.cyberlink.faceme.FaceMeRecognizer;
 import com.cyberlink.faceme.FaceMeSdk;
+import com.cyberlink.faceme.QueryResult;
+import com.cyberlink.faceme.RecognizerConfig;
+import com.cyberlink.faceme.RecognizerMode;
 import com.cyberlink.faceme.LicenseManager;
 
+import inc.bastion.faceme.FaceHolder;
+
 import android.content.Context;
+import android.util.Log;
 /**
  * This class echoes a string called from JavaScript.
  */
-public class faceme extends CordovaPlugin {
+public class FaceMe extends CordovaPlugin {
     private static final String TAG = "FaceMe";
 
     private static final String TEST_PLUGIN = "testPlugin";
@@ -34,7 +55,7 @@ public class faceme extends CordovaPlugin {
     private FaceMeRecognizer recognizer = null;
     private ExtractConfig extractConfig = null;
 
-    public faceme(){
+    public FaceMe(){
         super();
         Log.d(TAG, "Loading");
     }
@@ -46,28 +67,18 @@ public class faceme extends CordovaPlugin {
         }else if(INITIALIZE_SDK.equals(action)){
             return initializeSDK(callbackContext);
         }
-
-
-
-        // if (action.equals("coolMethod")) {
-        //     String message = args.getString(0);
-        //     this.coolMethod(message, callbackContext);
-        //     return true;
-        // }else if(action.equals("initializeFaceme")){
-        //     this.initializeFaceme(callbackContext);
-        //     return true;
-        // }
-        // return false;
+         return false;
     }
 
-
-    private void testPlugin(CallbackContext callbackContext){
+    private boolean testPlugin(CallbackContext callbackContext){
         testPluginCallbackContext = callbackContext;
 
         callbackContext.success("PLUGIN TEST ABCD 1234");
+
+        return true;
     }
 
-    private void initializeSDK(CallbackContext callbackContext){
+    private boolean initializeSDK(CallbackContext callbackContext){
 
         String LICENSE_KEY = "Ae7XoEbv9HPwTdMh8IeZJxmtIkg4FAvzW8v8WdJc";
         Context context = this.cordova.getActivity().getApplicationContext();
@@ -85,15 +96,10 @@ public class faceme extends CordovaPlugin {
             callbackContext.success("SDK initialized failed: Server Error" + result);
         }
         
+        return true;
     }
 
-    private void coolMethod(String message, CallbackContext callbackContext) {
-        if (message != null && message.length() > 0) {
-            callbackContext.success(message);
-        } else {
-            callbackContext.error("Expected one non-empty string argument.");
-        }
-    }
+/* 
     private ArrayList<FaceHolder> extractBitmap(Bitmap bitmap){
         if(recognizer == null || bitmap.getHeight() != maxFrameHeight || bitmap.getWidth() != maxFrameWidth){
             maxFrameHeight = bitmap.getHeight();
@@ -119,7 +125,6 @@ public class faceme extends CordovaPlugin {
         }
         return faces;
     }
-
     private void releaseRecognizer(){
         if(recognizer != null){
             recognizer.release();
@@ -173,7 +178,6 @@ public class faceme extends CordovaPlugin {
             throw e;
         }
     }
-
     private JSONArray convertToJsonArray(ArrayList<FaceHolder> faceHolders) throws JSONException{
         JSONArray jsonArray = new JSONArray();
 
@@ -197,5 +201,5 @@ public class faceme extends CordovaPlugin {
 
         return jsonArray;
     }
-
+*/
 }

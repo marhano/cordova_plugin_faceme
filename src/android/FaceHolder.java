@@ -1,4 +1,4 @@
-package com.example.faceme;
+package inc.bastion.faceme;
 
 import android.graphics.Bitmap;
 
@@ -7,7 +7,7 @@ import com.cyberlink.faceme.FaceFeature;
 import com.cyberlink.faceme.FaceInfo;
 import com.cyberlink.faceme.FaceLandmark; 
 
-import com.example.faceme.FaceData;
+import inc.bastion.faceme.FaceData;
 
 public class FaceHolder{
     public final FaceInfo faceInfo;
