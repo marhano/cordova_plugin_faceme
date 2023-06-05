@@ -4,6 +4,8 @@ import org.apache.cordova.CordovaPlugin;
 
 import java.util.ArrayList;
 
+import javax.security.auth.callback.Callback;
+
 import org.apache.cordova.CallbackContext;
 
 import org.json.JSONArray;
@@ -18,31 +20,54 @@ import android.content.Context;
  * This class echoes a string called from JavaScript.
  */
 public class faceme extends CordovaPlugin {
+    private static final String TAG = "FaceMe";
+
+    private static final String TEST_PLUGIN = "testPlugin";
+    private static final String INITIALIZE_SDK = "initializeSDK";
+
+    private CallbackContext testPluginCallbackContext;
+    private CallbackContext initializeSDKCallbackContext;
+
+    private CallbackContext execCallback;
+    private JSONArray execArgs;
+    
     private FaceMeRecognizer recognizer = null;
     private ExtractConfig extractConfig = null;
 
+    public faceme(){
+        super();
+        Log.d(TAG, "Loading");
+    }
+
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-        if (action.equals("coolMethod")) {
-            String message = args.getString(0);
-            this.coolMethod(message, callbackContext);
-            return true;
-        }else if(action.equals("initializeFaceme")){
-            this.initializeFaceme(callbackContext);
-            return true;
+        if(TEST_PLUGIN.equals(action)){
+            return testPlugin(callbackContext);
+        }else if(INITIALIZE_SDK.equals(action)){
+            return initializeSDK(callbackContext);
         }
-        return false;
+
+
+
+        // if (action.equals("coolMethod")) {
+        //     String message = args.getString(0);
+        //     this.coolMethod(message, callbackContext);
+        //     return true;
+        // }else if(action.equals("initializeFaceme")){
+        //     this.initializeFaceme(callbackContext);
+        //     return true;
+        // }
+        // return false;
     }
 
-    private void coolMethod(String message, CallbackContext callbackContext) {
-        if (message != null && message.length() > 0) {
-            callbackContext.success(message);
-        } else {
-            callbackContext.error("Expected one non-empty string argument.");
-        }
+
+    private void testPlugin(CallbackContext callbackContext){
+        testPluginCallbackContext = callbackContext;
+
+        callbackContext.success("PLUGIN TEST ABCD 1234");
     }
 
-    private void initializeFaceme(CallbackContext callbackContext){
+    private void initializeSDK(CallbackContext callbackContext){
 
         String LICENSE_KEY = "Ae7XoEbv9HPwTdMh8IeZJxmtIkg4FAvzW8v8WdJc";
         Context context = this.cordova.getActivity().getApplicationContext();
@@ -62,31 +87,13 @@ public class faceme extends CordovaPlugin {
         
     }
 
-    private void initializeRecognizer(){
-        int result;
-        try {
-            releaseRecognizer();
-            
-            recognizer = new FaceRecognizer();
-            RecognizerConfig recognizerConfig = new RecognizerConfig();
-            recognizerConfig.preference = EnginePreference.PREFER_NONE;
-            recognizerConfig.detectionModelSpeedLevel = DetectionModelSpeedLevel.DEFAULT;
-            recognizerConfig.maxDetectionThreads = 2;
-            recognizerConfig.extractionModelSpeedLevel = ExtractionModelSpeedLevel.VH6;
-            recognizerConfig.maxExtractionThreads = 2;
-            recognizerConfig.mode = RecognizerMode.IMAGE;
-            recognizerConfig.maxFrameHeight = maxFrameHeight;
-            recognizerConfig.maxFrameWidth = maxFrameWidth;
-            recognizerConfig.minFaceWidthRatio = 0.05f;
-            result = recognizer.initializeEx(recognizerConfig);
-            if (result < 0) throw new IllegalStateException("Initialize recognizer failed: " + result);
-
-        } catch (Exception e) {
-            releaseRecognizer();
-            throw e;
+    private void coolMethod(String message, CallbackContext callbackContext) {
+        if (message != null && message.length() > 0) {
+            callbackContext.success(message);
+        } else {
+            callbackContext.error("Expected one non-empty string argument.");
         }
     }
-
     private ArrayList<FaceHolder> extractBitmap(Bitmap bitmap){
         if(recognizer == null || bitmap.getHeight() != maxFrameHeight || bitmap.getWidth() != maxFrameWidth){
             maxFrameHeight = bitmap.getHeight();
@@ -119,7 +126,6 @@ public class faceme extends CordovaPlugin {
             recognizer = null;
         }
     }
-
     private void configure(){
         if(recognizer == null){
             return;
@@ -142,6 +148,30 @@ public class faceme extends CordovaPlugin {
         extractConfig.extractEmotion = true;
         extractConfig.extractPose = true;
         extractConfig.extractOcclusion = true;
+    }
+    private void initializeRecognizer(){
+        int result;
+        try {
+            releaseRecognizer();
+            
+            recognizer = new FaceRecognizer();
+            RecognizerConfig recognizerConfig = new RecognizerConfig();
+            recognizerConfig.preference = EnginePreference.PREFER_NONE;
+            recognizerConfig.detectionModelSpeedLevel = DetectionModelSpeedLevel.DEFAULT;
+            recognizerConfig.maxDetectionThreads = 2;
+            recognizerConfig.extractionModelSpeedLevel = ExtractionModelSpeedLevel.VH6;
+            recognizerConfig.maxExtractionThreads = 2;
+            recognizerConfig.mode = RecognizerMode.IMAGE;
+            recognizerConfig.maxFrameHeight = maxFrameHeight;
+            recognizerConfig.maxFrameWidth = maxFrameWidth;
+            recognizerConfig.minFaceWidthRatio = 0.05f;
+            result = recognizer.initializeEx(recognizerConfig);
+            if (result < 0) throw new IllegalStateException("Initialize recognizer failed: " + result);
+
+        } catch (Exception e) {
+            releaseRecognizer();
+            throw e;
+        }
     }
 
     private JSONArray convertToJsonArray(ArrayList<FaceHolder> faceHolders) throws JSONException{
@@ -167,6 +197,5 @@ public class faceme extends CordovaPlugin {
 
         return jsonArray;
     }
-
 
 }
