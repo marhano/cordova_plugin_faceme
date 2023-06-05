@@ -25,26 +25,36 @@ description: Integrate faceme cyberlink sdk to cordova.
 
 <!-- [![Android Testsuite](https://github.com/apache/cordova-plugin-device/actions/workflows/android.yml/badge.svg)](https://github.com/apache/cordova-plugin-device/actions/workflows/android.yml) [![Chrome Testsuite](https://github.com/apache/cordova-plugin-device/actions/workflows/chrome.yml/badge.svg)](https://github.com/apache/cordova-plugin-device/actions/workflows/chrome.yml) [![iOS Testsuite](https://github.com/apache/cordova-plugin-device/actions/workflows/ios.yml/badge.svg)](https://github.com/apache/cordova-plugin-device/actions/workflows/ios.yml) [![Lint Test](https://github.com/apache/cordova-plugin-device/actions/workflows/lint.yml/badge.svg)](https://github.com/apache/cordova-plugin-device/actions/workflows/lint.yml) -->
 
-This plugin defines a global `faceme` object, which calls available methods.
+## How to use
+You need to declare cordova: any
 
 ```ts
+declare cordova var: any;
+
 constructor(private platform : Platform){}
 ngOnInit(){
+  const success = (result: any) => {
+    this.logMessage(result);
+  };
   this.platform.ready().then(() => {
-    faceme.initialize():
+    cordova.exec(success, null, 'FaceMe', 'initializeSDK', []);
   });
 }
 ```
 
 ## Installation
 
+Copy `faceme-6.14.0.aar` to `cordova-plugin-faceme/src/android/libs`
+
     cordova plugin add https://github.com/marhano/cordova_plugin_faceme
+    
 
 ## Properties
 
-- faceme.initialize
+- pluginTest
+- initializeSDK
 
-## faceme.initialize
+## initializeSDK
 
 Initialize the FaceMeSdk with a lincese key. Verify and register the license returns true or false.
 
@@ -54,9 +64,7 @@ Example:
 const success = (result: any) => {
   alert(result);
 };
-if(this.platform.is('cordova')){
-  cordova.exec(success, null, 'FaceMe', 'initialize', []);
-}else{
-  alert('Cordova not available);
-}
+this.platform.ready().then(() => {
+  cordova.exec(success, null, 'FaceMe', 'initializeSDK', []);
+});
 ```
