@@ -55,7 +55,7 @@ Install the `@awesome-cordova-plugins/face-me` from github repository `https://g
 
 Install the cordova plugin FaceMe and copy `faceme-6.14.0.aar` to `cordova-plugin-faceme/src/android/libs`
 
-    cordova plugin add https://github.com/marhano/cordova_plugin_faceme
+    ionic cordova plugin add https://github.com/marhano/cordova_plugin_faceme
     
 
 ## Properties
