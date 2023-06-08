@@ -49,8 +49,9 @@ this.platform.ready().then(() => {
 ```
 
 ## Installation
-Install the `@awesome-cordova-plugins/face-me` from github repository `https://github.com/marhano/awesome_cordova_plugins_faceme` this will act as wrapper for the actual plugin
+Install `@awesome-cordova-plugins/core` and `@awesome-cordova-plugins/face-me` from github repository `https://github.com/marhano/awesome_cordova_plugins_faceme` this will act as wrapper for the actual plugin
 
+    npm install @awesome-cordova-plugins-core
     npm install https://github.com/marhano/awesome_cordova_plugins_faceme.git
 
 Install the cordova plugin FaceMe and copy `faceme-6.14.0.aar` to `cordova-plugin-faceme/src/android/libs`
