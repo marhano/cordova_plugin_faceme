@@ -45,8 +45,16 @@
 ## 7. Modify plugin.xml:
    - Open the plugin.xml file in VSCode.
    - Find the `<feature>` tag and modify the Android project with an appropriate package name (e.g., inc.bastion.pluginname.PluginName). Ensure that the separator is a dot (".") for it to work correctly.
-   - Find the `<source-file>` change the target-dir to the package name swap the "." with "/" of the packange name (e.g., target-dir="src/inc/bastion/pluginame/PluginName").
-   - Open the `PluginName.java` from `src/android/PluginName.java` and do the same with the package name (e.g, package inc.bastion.pluginname).
+   - Find the `<source-file>` change the target-dir to the package name swap the "." with "/" of the packange name e.g.,
+
+      ```xml
+      <source-file src="src/android/PluginName.java" target-dir="src/inc/bastion/pluginname/PluginName" />
+      ```
+   - Open the `PluginName.java` from `src/android/PluginName.java` and do the same with the package name (e.g,).
+
+      ```java
+      package inc.bastion.pluginname;
+      ```
 
 ## 8. Create package.json file:
    - Generate a package.json file for your plugin project:
@@ -103,3 +111,14 @@
      ```
 
    - The application should display an alert with the message "Hello World."
+
+# Debugging
+
+When modifying the plugin project and reinstalling at the test project make sure to remove the platform before installing the plugin again to reset the android platform to it's clean state.
+
+```
+ionic cordova platform remove android
+ionic cordova plugin add ../cordova_plugins/PluginName --link
+ionic cordova platform add android
+ionic cordova run android
+```
