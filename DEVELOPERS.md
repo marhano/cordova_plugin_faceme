@@ -45,6 +45,7 @@
 ## 7. Modify plugin.xml:
    - Open the plugin.xml file in VSCode.
    - Find the `<feature>` tag and modify the Android project with an appropriate package name (e.g., inc.bastion.pluginname.PluginName). Ensure that the separator is a dot (".") for it to work correctly.
+   - Open the `PluginName.java` from `src/android/PluginName.java` and do the same with the package name (e.g, package inc.bastion.pluginname).
 
 ## 8. Create package.json file:
    - Generate a package.json file for your plugin project:
