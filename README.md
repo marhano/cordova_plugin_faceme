@@ -28,23 +28,33 @@ description: Integrate faceme cyberlink sdk to cordova.
 ## How to use
 You need to declare cordova: any
 
-```ts
-declare cordova var: any;
+Import `FaceMe` in your component file:
 
-constructor(private platform : Platform){}
-ngOnInit(){
-  const success = (result: any) => {
-    this.logMessage(result);
-  };
-  this.platform.ready().then(() => {
-    cordova.exec(success, null, 'FaceMe', 'initializeSDK', []);
+```ts
+import { FaceMe } from '@awesome-cordova-plugins/face-me/ngx';
+```
+
+Add `FaceMe` to the constructor:
+```ts
+constructor(private platform: Platform, private faceMe: FaceMe)
+```
+Ensure that the platform is ready before using the plugin:
+```ts
+this.platform.ready().then(() => {
+  this.faceMe.testPlugin().then((res: any) => {
+    this.logMessage(res);
+  }).catch((error: any) => {
+    this.logMessage(error);
   });
-}
+});
 ```
 
 ## Installation
+Install the `@awesome-cordova-plugins/face-me` from github repository `https://github.com/marhano/awesome_cordova_plugins_faceme` this will act as wrapper for the actual plugin
 
-Copy `faceme-6.14.0.aar` to `cordova-plugin-faceme/src/android/libs`
+    npm install https://github.com/marhano/awesome_cordova_plugins_faceme.git
+
+Install the cordova plugin FaceMe and copy `faceme-6.14.0.aar` to `cordova-plugin-faceme/src/android/libs`
 
     cordova plugin add https://github.com/marhano/cordova_plugin_faceme
     
@@ -54,6 +64,22 @@ Copy `faceme-6.14.0.aar` to `cordova-plugin-faceme/src/android/libs`
 - pluginTest
 - initializeSDK
 
+## pluginTest
+
+Returns a test string to check if the plugin is working.
+
+Example:
+
+```ts
+this.platform.ready().then(() => {
+  this.faceMe.pluginTest().then((res: any) => {
+    console.log(res);
+  }).catch((error: any) => {
+    console.log(error);
+  });
+});
+```
+
 ## initializeSDK
 
 Initialize the FaceMeSdk with a lincese key. Verify and register the license returns true or false.
@@ -61,10 +87,11 @@ Initialize the FaceMeSdk with a lincese key. Verify and register the license ret
 Example:
 
 ```ts
-const success = (result: any) => {
-  alert(result);
-};
 this.platform.ready().then(() => {
-  cordova.exec(success, null, 'FaceMe', 'initializeSDK', []);
+  this.faceMe.initializeSDK().then((res: any) => {
+    console.log(res);
+  }).catch((error: any) => {
+    console.log(error);
+  });
 });
 ```
