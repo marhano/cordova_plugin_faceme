@@ -12,8 +12,16 @@ FaceMe.initializeSDK = function(onSuccess, onError){
     exec(onSuccess, onError, PLUGIN_NAME, "initializeSDK", []);
 };
 
-FaceMe.extractFace = function(base64Image, onSuccess, onError){
-    exec(onSuccess, onError, PLUGIN_NAME, "extractFace", [base64Image]);
+FaceMe.getBase64Image = function(base64Image, onSuccess, onError){
+    exec(onSuccess, onError, PLUGIN_NAME, "getBase64Image", [base64Image]);
+};
+
+FaceMe.getBoundingBox = function(onSuccess, onError){
+    exec(onSuccess, onError, PLUGIN_NAME, "getBoundingBox", []);
+};
+
+FaceMe.getBitmapImage = function(pixelData, onSuccess, onError){
+    exec(onSuccess, onError, PLUGIN_NAME, "getBitmapImage", [pixelData]);
 };
 
 module.exports = FaceMe;
