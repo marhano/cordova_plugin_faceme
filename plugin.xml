@@ -18,5 +18,6 @@ xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.a
         <source-file src="src/android/FaceHolder.java" target-dir="src/inc/bastion/faceme/FaceMe" />
         <source-file src="src/android/FaceData.java" target-dir="src/inc/bastion/faceme/FaceMe" />
         <source-file src="src/android/RectUtil.java" target-dir="src/inc/bastion/faceme/FaceMe" />
+        <source-file src="src/android/LicenseUtils.java" target-dir="src/inc/bastion/faceme/FaceMe" />
     </platform>
 </plugin>
