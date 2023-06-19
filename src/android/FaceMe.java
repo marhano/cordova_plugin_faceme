@@ -38,6 +38,7 @@ import inc.bastion.faceme.LicenseUtils;
 
 import android.graphics.Matrix;
 import android.nfc.Tag;
+import android.telecom.Call;
 import android.util.Base64;
 import android.content.Context;
 import android.util.Log;
@@ -53,16 +54,18 @@ public class FaceMe extends CordovaPlugin {
   private boolean isLicenseActivated = false;
 
   private static final String TEST_PLUGIN = "testPlugin";
-  private static final String INITIALIZE_SDK = "initializeSDK";
+
   private static final String GET_BASE64_IMAGE = "getBase64Image";
   private static final String GET_BOUNDING_BOX = "getBoundingBox";
   private static final String GET_BITMAP_IMAGE = "getBitmapImage";
   private static final String ACTIVATE_LICENSE = "activateLicense";
   private static final String DEACTIVATE_LICENSE = "deactivateLicense";
 
-  private CallbackContext testPluginCallbackContext;
-  private CallbackContext initializeSDKCallbackContext;
-  private CallbackContext extractFace;
+  //INITIAL METHODS FOR PROTOTYPE
+  private static final String INITIALIZE_SDK = "initializeSDK";
+  private static final String DETECT_FACE = "detectFace";
+  private static final String ENROLL_FACE = "enrollFace";
+  private static final String RECOGNIZE_FACE = "recognizeFace";
 
   private CallbackContext execCallback;
   private JSONArray execArgs;
@@ -89,8 +92,6 @@ public class FaceMe extends CordovaPlugin {
     }else if(GET_BASE64_IMAGE.equals(action)){
       String base64Image = args.getString(0);
       return getBase64Image(base64Image, callbackContext);
-    }else if(GET_BOUNDING_BOX.equals(action)){
-      return getBoundingBox(callbackContext);
     }else if(GET_BITMAP_IMAGE.equals(action)){
       JSONArray pixelDataArray = args.getJSONArray(0);
       return getBitmapImage(pixelDataArray, callbackContext);
@@ -98,9 +99,63 @@ public class FaceMe extends CordovaPlugin {
       return activateLicense(callbackContext);
     }else if(DEACTIVATE_LICENSE.equals(action)){
       return deactivateLicense(callbackContext);
+    }else if(DETECT_FACE.equals(action)){
+      String base64Image = args.getString(0);
+      return detectFace(base64Image, callbackContext);
+    }else if(ENROLL_FACE.equals(action)){
+      return enrollFace(callbackContext);
+    }else if(RECOGNIZE_FACE.equals(action)){
+      return recognizeFace(callbackContext);
     }
     return false;
   }
+
+  private boolean initializeSDK(CallbackContext callbackContext){
+    Context context = this.cordova.getActivity().getApplicationContext();
+    FaceMeSdk.initialize(context, LICENSE_KEY);
+
+    LicenseManager licenseManager = null;
+    licenseManager = new LicenseManager();
+    int result = licenseManager.initializeEx();
+    result = licenseManager.registerLicense();
+    licenseManager.release();
+
+    if(result == 0){
+      callbackContext.success("SDK initialized successfully");
+    }else{
+      callbackContext.success("SDK initialized failed: Server Error" + result);
+    }
+
+    return true;
+  }
+
+  private boolean detectFace(String base64Image, CallbackContext callbackContext) throws JSONException{
+    Bitmap bitmap = base64ToBitmap(base64Image);
+    if(recognizer == null || bitmap.getHeight() != maxFrameHeight || bitmap.getHeight() != maxFrameWidth){
+      maxFrameHeight = bitmap.getHeight();
+      maxFrameWidth = bitmap.getWidth();
+      releaseRecognizer();
+      initializeRecognizer();
+    }
+
+    JSONObject jsonObjectFaceHolder = extractBitmap(bitmap);
+    if(isLicenseActivated == true){
+      callbackContext.success(jsonObjectFaceHolder);
+    }
+    return true;
+  }
+
+  private boolean enrollFace(CallbackContext callbackContext){
+    callbackContext.success("Enroll Face");
+    return true;
+  }
+
+  private boolean recognizeFace(CallbackContext callbackContext){
+    callbackContext.success("Recognize Face");
+    return true;
+  }
+
+
 
   private boolean getBitmapImage(JSONArray pixelDataArray, CallbackContext callbackContext) throws JSONException{
     int width = 400;
@@ -112,20 +167,6 @@ public class FaceMe extends CordovaPlugin {
       int color = pixelDataArray.getInt(i);
       bitmap.setPixel(i % width, i / width, color);
     }
-
-    return true;
-  }
-
-  private boolean getBoundingBox(CallbackContext callbackContext) throws JSONException{
-    Rect rect = generateRandomBoundingBox();
-
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("left", rect.left);
-    jsonObject.put("top", rect.top);
-    jsonObject.put("right", rect.right);
-    jsonObject.put("bottom", rect.bottom);
-
-    callbackContext.success(jsonObject.toString());
 
     return true;
   }
@@ -165,24 +206,6 @@ public class FaceMe extends CordovaPlugin {
     return true;
   }
 
-  private boolean initializeSDK(CallbackContext callbackContext){
-    Context context = this.cordova.getActivity().getApplicationContext();
-    FaceMeSdk.initialize(context, LICENSE_KEY);
-
-    LicenseManager licenseManager = null;
-    licenseManager = new LicenseManager();
-    int result = licenseManager.initializeEx();
-    result = licenseManager.registerLicense();
-    licenseManager.release();
-
-    if(result == 0){
-      callbackContext.success("SDK initialized successfully");
-    }else{
-      callbackContext.success("SDK initialized failed: Server Error" + result);
-    }
-
-    return true;
-  }
   private boolean deactivateLicense(CallbackContext callbackContext){
     Context context = this.cordova.getActivity().getApplicationContext();
     LicenseUtils licenseUtils = new LicenseUtils();
@@ -194,6 +217,7 @@ public class FaceMe extends CordovaPlugin {
     callbackContext.success(isDeactivated);
     return true;
   }
+
   private boolean activateLicense(CallbackContext callbackContext){
     Context context = this.cordova.getActivity().getApplicationContext();
     LicenseUtils licenseUtils = new LicenseUtils();
@@ -208,20 +232,6 @@ public class FaceMe extends CordovaPlugin {
 
 
 
-
-
-  private Rect generateRandomBoundingBox(){
-    Random random = new Random();
-    int viewHeight = cordova.getActivity().getWindow().getDecorView().getHeight();
-    int viewWidth = cordova.getActivity().getWindow().getDecorView().getWidth();
-
-    int left = random.nextInt(viewWidth - MIN_COORDINATE + 1) + MIN_COORDINATE;
-    int top = random.nextInt(viewHeight - MIN_COORDINATE + 1) + MIN_COORDINATE;
-    int right = random.nextInt(viewWidth - left + 1) + left;
-    int bottom = random.nextInt(viewHeight - top + 1) + top;
-
-    return new Rect(left, top, right, bottom);
-  }
 
   private JSONObject convertToJsonArray(ArrayList<FaceHolder> faceHolders) throws JSONException{
     JSONObject faceHolderObj = new JSONObject();
@@ -354,13 +364,7 @@ public class FaceMe extends CordovaPlugin {
   private Bitmap base64ToBitmap(String base64Image) {
     byte[] decodedBytes = Base64.decode(base64Image, Base64.DEFAULT);
     Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
-    return bitmap;
+    return configBitmap(bitmap);
   }
 
-  private String bitmapToBase64(Bitmap bitmapImage) {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, baos);
-    byte[] imageBytes = baos.toByteArray();
-    return Base64.encodeToString(imageBytes, Base64.DEFAULT);
-  }
 }
