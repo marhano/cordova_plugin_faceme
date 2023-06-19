@@ -30,6 +30,14 @@ FaceMe.activateLicense = function(onSuccess, onError){
 
 FaceMe.deactivateLicense = function(onSuccess, onError){
     exec(onSuccess, onError, PLUGIN_NAME, "deactivateLicense", []);
+};
+
+FaceMe.detectFace = function(base64Image, onSuccess, onError){
+    exec(onSuccess, onError, PLUGIN_NAME, "detectFace", [base64Image]);
+};
+
+FaceMe.enrollFace = function(username, faceHolder, onSuccess, onError){
+    exec(onSuccess, onError, PLUGIN_NAME, "enrollFace", [username, faceHolder]);
 }
 
 module.exports = FaceMe;
