@@ -172,7 +172,6 @@ public class FaceMe extends CordovaPlugin {
   }
 
   private boolean getBase64Image(String pixelData, CallbackContext callbackContext) throws JSONException{
-    extractFace = callbackContext;
     Bitmap bitmap = base64ToBitmap(pixelData);
 
 
@@ -199,8 +198,6 @@ public class FaceMe extends CordovaPlugin {
   }
 
   private boolean testPlugin(CallbackContext callbackContext){
-    testPluginCallbackContext = callbackContext;
-
     callbackContext.success("PLUGIN TEST ABCD 1234");
 
     return true;
