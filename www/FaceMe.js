@@ -38,6 +38,10 @@ FaceMe.detectFace = function(base64Image, onSuccess, onError){
 
 FaceMe.enrollFace = function(username, faceHolder, onSuccess, onError){
     exec(onSuccess, onError, PLUGIN_NAME, "enrollFace", [username, faceHolder]);
-}
+};
+
+FaceMe.recognizeFace = function(onSuccess, onError){
+    exec(onSuccess, onError, PLUGIN_NAME, "recognizeFace", []);
+};
 
 module.exports = FaceMe;
