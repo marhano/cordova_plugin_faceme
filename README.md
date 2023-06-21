@@ -63,6 +63,11 @@ Install the cordova plugin FaceMe and copy `faceme-6.14.0.aar` to `cordova-plugi
 
 - pluginTest
 - initializeSDK
+- detectFace
+- enrollFace
+- recognizeFace
+- deleteFace
+- updateFace
 
 ## pluginTest
 
@@ -82,16 +87,28 @@ this.platform.ready().then(() => {
 
 ## initializeSDK
 
-Initialize the FaceMeSdk with a lincese key. Verify and register the license returns true or false.
+Initialize the FaceMeSdk with a lincese key. Verify and register the license return FaceMeSDK ReturnCode.
 
-Example:
+## detectFace
 
-```ts
-this.platform.ready().then(() => {
-  this.faceMe.initializeSDK().then((res: any) => {
-    console.log(res);
-  }).catch((error: any) => {
-    console.log(error);
-  });
-});
-```
+Detect face and returns face holder data(FaceFeature, FaceAttribute, FaceInfo, FaceLandmark, FaceBitmap)
+
+## enrollFace
+
+Add a face collection in you local database. Accepts a unique string and returns face data.
+
+## recognizeFace
+
+Check if scanned face are inside the database. Return true or false.
+
+## deleteFace
+
+Delete a face.
+
+## updateFace
+
+Update a face
+
+
+
+
