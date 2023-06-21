@@ -63,6 +63,8 @@ Install the cordova plugin FaceMe and copy `faceme-6.14.0.aar` to `cordova-plugi
 
 - pluginTest
 - initializeSDK
+- activateLicense
+- deactivateLicense
 - detectFace
 - enrollFace
 - recognizeFace
