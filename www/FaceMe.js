@@ -36,12 +36,24 @@ FaceMe.detectFace = function(base64Image, onSuccess, onError){
     exec(onSuccess, onError, PLUGIN_NAME, "detectFace", [base64Image]);
 };
 
-FaceMe.enrollFace = function(username, faceHolder, onSuccess, onError){
-    exec(onSuccess, onError, PLUGIN_NAME, "enrollFace", [username, faceHolder]);
+FaceMe.enrollFace = function(username, onSuccess, onError){
+    exec(onSuccess, onError, PLUGIN_NAME, "enrollFace", [username]);
 };
 
 FaceMe.recognizeFace = function(onSuccess, onError){
     exec(onSuccess, onError, PLUGIN_NAME, "recognizeFace", []);
+};
+
+FaceMe.deleteFace = function(faceId, onSuccess, onError){
+    exec(onSuccess, onError, PLUGIN_NAME, "deleteFace", [faceId]);
+};
+
+FaceMe.updateFace = function(onSuccess, onError){
+    exec(onSuccess, onError, PLUGIN_NAME, "updateFace", []);
+};
+
+FaceMe.selectFace = function(onSuccess, onError){
+    exec(onSuccess, onError, PLUGIN_NAME, "selectFace", []);
 };
 
 module.exports = FaceMe;

@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 import com.cyberlink.faceme.DetectionMode;
@@ -28,9 +29,13 @@ import com.cyberlink.faceme.FaceLandmark;
 import com.cyberlink.faceme.FaceMeDataManager;
 import com.cyberlink.faceme.FaceMeRecognizer;
 import com.cyberlink.faceme.FaceMeSdk;
+import com.cyberlink.faceme.PrecisionLevel;
+import com.cyberlink.faceme.QueryResult;
 import com.cyberlink.faceme.RecognizerConfig;
 import com.cyberlink.faceme.RecognizerMode;
 import com.cyberlink.faceme.LicenseManager;
+import com.cyberlink.faceme.ReturnCode;
+import com.cyberlink.faceme.SimilarFaceResult;
 
 import inc.bastion.faceme.FaceHolder;
 import inc.bastion.faceme.RectUtil;
@@ -70,6 +75,8 @@ public class FaceMe extends CordovaPlugin {
   private CallbackContext execCallback;
   private JSONArray execArgs;
 
+  private FaceHolder _faceHolder;
+  private FaceMeDataManager _dataManager = null;
   private FaceMeRecognizer recognizer = null;
   private ExtractConfig extractConfig = null;
 
@@ -103,7 +110,9 @@ public class FaceMe extends CordovaPlugin {
       String base64Image = args.getString(0);
       return detectFace(base64Image, callbackContext);
     }else if(ENROLL_FACE.equals(action)){
-      return enrollFace(callbackContext);
+      String username = args.getString(0);
+      JSONObject faceHolder = args.getJSONObject(1);
+      return enrollFace(username, faceHolder, callbackContext);
     }else if(RECOGNIZE_FACE.equals(action)){
       return recognizeFace(callbackContext);
     }
@@ -138,24 +147,132 @@ public class FaceMe extends CordovaPlugin {
       initializeRecognizer();
     }
 
-    JSONObject jsonObjectFaceHolder = extractBitmap(bitmap);
-    if(isLicenseActivated == true){
+    JSONObject jsonObjectFaceHolder = extractFace(bitmap);
+
+    if(isLicenseActivated == true && jsonObjectFaceHolder != null){
       callbackContext.success(jsonObjectFaceHolder);
     }
     return true;
   }
 
-  private boolean enrollFace(CallbackContext callbackContext){
-    callbackContext.success("Enroll Face");
+  private boolean enrollFace(String username, JSONObject faceHolder, CallbackContext callbackContext) throws JSONException{
+    FaceMeDataManager dataManager = new FaceMeDataManager();
+    int result = dataManager.initializeEx(recognizer.getFeatureScheme());
+    if (result < 0) throw new IllegalStateException("Initialize data manager failed: " + result);
+    _dataManager = dataManager;
+
+    FaceHolder holder = _faceHolder;
+    updateFaceHolder(holder);
+    JSONObject jsonObjectFaceHolder = convertToJsonArray(holder);
+    //updateFace(holder, username);
+    callbackContext.success(jsonObjectFaceHolder);
     return true;
+  }
+
+  private boolean updateFaceHolder(FaceHolder faceHolder){
+    if(_dataManager == null) return false;
+    float confidenceThreshold = _dataManager.getPrecisionThreshold(PrecisionLevel.LEVEL_1E6);
+
+    List<SimilarFaceResult> searchResult = _dataManager.searchSimilarFace(confidenceThreshold, -1, faceHolder.faceFeature, 1);
+    if(searchResult != null && !searchResult.isEmpty()){
+      SimilarFaceResult result = searchResult.get(0);
+      faceHolder.data.collectionId = result.collectionId;
+      faceHolder.data.faceId = result.faceId;
+      faceHolder.data.confidence = result.confidence;
+    }
+
+    if(faceHolder.data.collectionId > 0){
+      faceHolder.data.name = _dataManager.getFaceCollectionName(faceHolder.data.collectionId);
+      return true;
+    }
+    return false;
+  }
+
+  private void updateFace(FaceHolder faceHolder, String name){
+    if(_dataManager == null) return;
+    FaceMeDataManager dataManager = _dataManager;
+    if (dataManager == null) {
+      Log.w(TAG, " > addFace: data manager unavailable");
+      return;
+    }
+    long collectionId = 0;
+    //QueryResult queryCollectionResult = dataManager.queryFaceCollection(0, 5);
+    //collectionId = queryCollectionResult.resultIds.get(0);
+    //QueryResult faceId = dataManager.queryFace(collectionId, 0, 1);
+    if(faceHolder.data.collectionId >= 0){
+      collectionId = faceHolder.data.collectionId;
+      boolean success = updateFaceName(collectionId, name);
+      if (!success) {
+        Log.w(TAG, " > addFace: update existing collectionName: " + faceHolder.data.name + " to " + name);
+        return;
+      }
+    }else {
+      QueryResult queryCollectionResult = dataManager.queryFaceCollectionByName(name, 0, 1);
+      if (queryCollectionResult == null || queryCollectionResult.resultIds.isEmpty()) {
+        collectionId = dataManager.createFaceCollection(name);
+        if (collectionId <= 0) {
+          if (ReturnCode.DATABASE_COLLECTION_EXCEEDED == collectionId) {
+            Log.d(TAG, "DB is already full!");
+          } else {
+            Log.d(TAG, "Something error when create new collection in DB: " + collectionId);
+          }
+          return;
+        }
+        Log.v(TAG, " > addFace: create new collection: " + collectionId);
+      } else {
+        collectionId = queryCollectionResult.resultIds.get(0);
+        Log.v(TAG, " > addFace: collection found: " + collectionId);
+      }
+    }
+
+    long faceId = dataManager.addFace(collectionId, faceHolder.faceFeature);
+    if (faceId <= 0) {
+      Log.e(TAG, " > addFace: but failed. Error code: " + faceId);
+      return;
+    }
+
+    Log.v(TAG, " > addFace: faceId: " + faceId);
+    faceHolder.data.collectionId = collectionId;
+    faceHolder.data.faceId = faceId;
+    faceHolder.data.name = name;
+    faceHolder.data.confidence = 1F;
+  }
+
+  private boolean updateFaceName(long collectionId, String newName){
+    FaceMeDataManager dataManager = _dataManager;
+    if(dataManager == null){
+      Log.w(TAG, " > addFace: data manager unavailable");
+      return false;
+    }
+
+    return dataManager.setFaceCollectionName(collectionId, newName);
   }
 
   private boolean recognizeFace(CallbackContext callbackContext){
-    callbackContext.success("Recognize Face");
+    FaceMeDataManager dataManager = new FaceMeDataManager();
+    int result = dataManager.initializeEx(recognizer.getFeatureScheme());
+    if (result < 0) throw new IllegalStateException("Initialize data manager failed: " + result);
+    _dataManager = dataManager;
+
+    long collectionId = 0;
+    QueryResult queryResult = dataManager.queryFaceCollection(0, 1);
+    if(queryResult != null || queryResult.resultIds.isEmpty()){
+      collectionId = queryResult.resultIds.get(0);
+      QueryResult queryFace = dataManager.queryFace(collectionId, 0, 1);
+      long faceId = queryFace.resultIds.get(0);
+      FaceFeature faceFeature = dataManager.getFaceFeature(faceId);
+      Log.d(TAG, "FaceFeature");
+    }
+    FaceHolder holder = _faceHolder;
+    if(updateFaceHolder(holder)){
+      callbackContext.success("true");
+    }
     return true;
   }
 
+  private void getAllFaceCollection(FaceHolder faceHolder){
 
+  }
 
   private boolean getBitmapImage(JSONArray pixelDataArray, CallbackContext callbackContext) throws JSONException{
     int width = 400;
@@ -230,35 +347,41 @@ public class FaceMe extends CordovaPlugin {
 
 
 
-  private JSONObject convertToJsonArray(ArrayList<FaceHolder> faceHolders) throws JSONException{
+  private JSONObject convertToJsonArray(FaceHolder faceHolder) throws JSONException{
     JSONObject faceHolderObj = new JSONObject();
-      for(FaceHolder faceHolder : faceHolders){
-        JSONObject faceAttributeObj = new JSONObject();
-        faceAttributeObj.put("age", faceHolder.faceAttribute.age);
-        faceAttributeObj.put("emotion", faceHolder.faceAttribute.emotion);
-        faceAttributeObj.put("gender", faceHolder.faceAttribute.gender);
-        faceAttributeObj.put("emotion", faceHolder.faceAttribute.emotion);
-        JSONObject poseObj = new JSONObject();
-        poseObj.put("pitch", faceHolder.faceAttribute.pose.pitch);
-        poseObj.put("roll", faceHolder.faceAttribute.pose.roll);
-        poseObj.put("yaw", faceHolder.faceAttribute.pose.yaw);
-        faceAttributeObj.put("pose", poseObj);
-        JSONObject faceInfoObj = new JSONObject();
-        JSONObject boundingBoxObj = new JSONObject();
-        boundingBoxObj.put("left", faceHolder.faceInfo.boundingBox.left);
-        boundingBoxObj.put("top", faceHolder.faceInfo.boundingBox.top);
-        boundingBoxObj.put("right", faceHolder.faceInfo.boundingBox.right);
-        boundingBoxObj.put("bottom", faceHolder.faceInfo.boundingBox.bottom);
-        faceInfoObj.put("boundingBox", boundingBoxObj);
-        JSONObject bitmapInfoObj = new JSONObject();
-        bitmapInfoObj.put("width", maxFrameWidth);
-        bitmapInfoObj.put("height", maxFrameHeight);
-        faceInfoObj.put("bitmap", bitmapInfoObj);
-        faceInfoObj.put("confidence", faceHolder.faceInfo.confidence);
+    JSONObject faceAttributeObj = new JSONObject();
+    JSONObject poseObj = new JSONObject();
+    JSONObject faceInfoObj = new JSONObject();
+    JSONObject boundingBoxObj = new JSONObject();
+    JSONObject bitmapInfoObj = new JSONObject();
 
-        faceHolderObj.put("faceAttribute", faceAttributeObj);
-        faceHolderObj.put("faceInfo", faceInfoObj);
-      }
+    faceAttributeObj.put("age", faceHolder.faceAttribute.age);
+    faceAttributeObj.put("emotion", faceHolder.faceAttribute.emotion);
+    faceAttributeObj.put("gender", faceHolder.faceAttribute.gender);
+    faceAttributeObj.put("emotion", faceHolder.faceAttribute.emotion);
+
+    poseObj.put("pitch", faceHolder.faceAttribute.pose.pitch);
+    poseObj.put("roll", faceHolder.faceAttribute.pose.roll);
+    poseObj.put("yaw", faceHolder.faceAttribute.pose.yaw);
+    faceAttributeObj.put("pose", poseObj);
+
+    boundingBoxObj.put("left", faceHolder.faceInfo.boundingBox.left);
+    boundingBoxObj.put("top", faceHolder.faceInfo.boundingBox.top);
+    boundingBoxObj.put("right", faceHolder.faceInfo.boundingBox.right);
+    boundingBoxObj.put("bottom", faceHolder.faceInfo.boundingBox.bottom);
+    faceInfoObj.put("boundingBox", boundingBoxObj);
+
+    bitmapInfoObj.put("width", maxFrameWidth);
+    bitmapInfoObj.put("height", maxFrameHeight);
+    faceInfoObj.put("bitmap", bitmapInfoObj);
+    faceInfoObj.put("confidence", faceHolder.faceInfo.confidence);
+
+    String croppedFace = bitmapToBase64(faceHolder.faceBitmap);
+
+    faceHolderObj.put("faceAttribute", faceAttributeObj);
+    faceHolderObj.put("faceInfo", faceInfoObj);
+    faceHolderObj.put("faceBitmap", croppedFace);
+
     return faceHolderObj;
   }
 
@@ -278,9 +401,27 @@ public class FaceMe extends CordovaPlugin {
         FaceHolder holder = new FaceHolder(faceInfo, faceLandmark, faceAttr, faceFeature, faceBitmap);
         faces.add(holder);
       }
-      jsonObjectFaceHolder = convertToJsonArray(faces);
+      //jsonObjectFaceHolder = convertToJsonArray(faces);
     }
     return jsonObjectFaceHolder;
+  }
+
+  private JSONObject extractFace(Bitmap bitmap) throws  JSONException{
+    int facesCount = recognizer.extractFace(extractConfig, Collections.singletonList(bitmap));
+    JSONObject jsonObjectFaceHolder = null;
+    if (facesCount > 0) {
+      FaceInfo faceInfo = recognizer.getFaceInfo(0, 0);
+      FaceLandmark landmark = recognizer.getFaceLandmark(0, 0);
+      FaceAttribute attribute = recognizer.getFaceAttribute(0, 0);
+      FaceFeature faceFeature = recognizer.getFaceFeature(0, 0);
+
+      Bitmap faceImage = getCropFaceBitmap(bitmap, faceInfo.boundingBox);
+      FaceHolder face = new FaceHolder(faceInfo, landmark, attribute, faceFeature, faceImage);
+      _faceHolder = face;
+      jsonObjectFaceHolder = convertToJsonArray(face);
+      return jsonObjectFaceHolder;
+    }
+    return null;
   }
 
   // CONFIGURE BITMAP IMAGE DISPLAY
@@ -362,6 +503,13 @@ public class FaceMe extends CordovaPlugin {
     byte[] decodedBytes = Base64.decode(base64Image, Base64.DEFAULT);
     Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
     return configBitmap(bitmap);
+  }
+
+  private String bitmapToBase64(Bitmap bitmapImage) {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, baos);
+    byte[] imageBytes = baos.toByteArray();
+    return Base64.encodeToString(imageBytes, Base64.DEFAULT);
   }
 
 }
