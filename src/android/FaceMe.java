@@ -58,15 +58,11 @@ public class FaceMe extends CordovaPlugin {
   private static final String LICENSE_KEY = "olJ5ziHGlU3FIHWZhhCAq27xJ70q4aMx1lVTK8TI";
   private boolean isLicenseActivated = false;
 
-  private static final String GET_BASE64_IMAGE = "getBase64Image";
-  private static final String GET_BOUNDING_BOX = "getBoundingBox";
-  private static final String GET_BITMAP_IMAGE = "getBitmapImage";
-  private static final String ACTIVATE_LICENSE = "activateLicense";
-  private static final String DEACTIVATE_LICENSE = "deactivateLicense";
-
   //INITIAL METHODS FOR PROTOTYPE
   private static final String TEST_PLUGIN = "testPlugin";
   private static final String INITIALIZE_SDK = "initializeSDK";
+  private static final String ACTIVATE_LICENSE = "activateLicense";
+  private static final String DEACTIVATE_LICENSE = "deactivateLicense";
   private static final String DETECT_FACE = "detectFace";
   private static final String ENROLL_FACE = "enrollFace";
   private static final String RECOGNIZE_FACE = "recognizeFace";
@@ -98,12 +94,6 @@ public class FaceMe extends CordovaPlugin {
       return testPlugin(callbackContext);
     }else if(INITIALIZE_SDK.equals(action)){
       return initializeSDK(callbackContext);
-    }else if(GET_BASE64_IMAGE.equals(action)){
-      String base64Image = args.getString(0);
-      return getBase64Image(base64Image, callbackContext);
-    }else if(GET_BITMAP_IMAGE.equals(action)){
-      JSONArray pixelDataArray = args.getJSONArray(0);
-      return getBitmapImage(pixelDataArray, callbackContext);
     }else if(ACTIVATE_LICENSE.equals(action)){
       return activateLicense(callbackContext);
     }else if(DEACTIVATE_LICENSE.equals(action)){
