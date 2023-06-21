@@ -103,8 +103,7 @@ public class FaceMe extends CordovaPlugin {
       return detectFace(base64Image, callbackContext);
     }else if(ENROLL_FACE.equals(action)){
       String username = args.getString(0);
-      JSONObject faceHolder = args.getJSONObject(1);
-      return enrollFace(username, faceHolder, callbackContext);
+      return enrollFace(username, callbackContext);
     }else if(RECOGNIZE_FACE.equals(action)){
       return recognizeFace(callbackContext);
     }else if(DELETE_FACE.equals(action)){
@@ -160,7 +159,7 @@ public class FaceMe extends CordovaPlugin {
     return true;
   }
 
-  private boolean enrollFace(String username, JSONObject faceHolder, CallbackContext callbackContext) throws JSONException{
+  private boolean enrollFace(String username, CallbackContext callbackContext) throws JSONException{
     FaceMeDataManager dataManager = new FaceMeDataManager();
     int result = dataManager.initializeEx(recognizer.getFeatureScheme());
     if (result < 0) throw new IllegalStateException("Initialize data manager failed: " + result);
