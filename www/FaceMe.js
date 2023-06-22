@@ -56,4 +56,8 @@ FaceMe.selectFace = function(onSuccess, onError){
     exec(onSuccess, onError, PLUGIN_NAME, "selectFace", []);
 };
 
+FaceMe.addFace = function(onSuccess, onError){
+    exec(onSuccess, onError, PLUGIN_NAME, "addFace", []);
+};
+
 module.exports = FaceMe;

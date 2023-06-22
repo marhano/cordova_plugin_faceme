@@ -69,6 +69,7 @@ public class FaceMe extends CordovaPlugin {
   private static final String DELETE_FACE = "deleteFace";
   private static final String UPDATE_FACE = "updateFace";
   private static final String SELECT_FACE = "selectFace";
+  private static final String ADD_FACE = "addFace";
 
   private CallbackContext execCallback;
   private JSONArray execArgs;
@@ -113,6 +114,8 @@ public class FaceMe extends CordovaPlugin {
       return updateFace(callbackContext);
     }else if(SELECT_FACE.equals(action)){
       return selectFace(callbackContext);
+    }else if(ADD_FACE.equals(action)){
+      return addFace(callbackContext);
     }
     return false;
   }
@@ -166,7 +169,11 @@ public class FaceMe extends CordovaPlugin {
     _dataManager = dataManager;
 
     FaceHolder holder = _faceHolder;
-    updateFaceHolder(holder);
+    if(!updateFaceHolder(holder)){
+      callbackContext.success(0);
+      return true;
+    }
+
     JSONObject jsonObjectFaceHolder = convertToJsonArray(holder);
     //updateFace(holder, username);
     callbackContext.success(jsonObjectFaceHolder);
@@ -197,19 +204,25 @@ public class FaceMe extends CordovaPlugin {
 
   private boolean deleteFace(long faceId, CallbackContext callbackContext){
     callbackContext.success("Delete Face");
-    
+
     return true;
   }
 
   private boolean updateFace(CallbackContext callbackContext){
     callbackContext.success("Update Face");
-    
+
     return true;
   }
-  
+
   private boolean selectFace(CallbackContext callbackContext){
     callbackContext.success("Select Face");
-    
+
+    return true;
+  }
+
+  private boolean addFace(CallbackContext callbackContext){
+    callbackContext.success("Add Face");
+
     return true;
   }
 
