@@ -170,7 +170,7 @@ public class FaceMe extends CordovaPlugin {
     _dataManager = dataManager;
 
     FaceHolder holder = _faceHolder;
-    if(!updateFaceHolder(holder)){
+    if(updateFaceHolder(holder)){
       callbackContext.success(0);
       return true;
     }
@@ -203,7 +203,17 @@ public class FaceMe extends CordovaPlugin {
   }
 
   private boolean deleteFace(long faceId, CallbackContext callbackContext){
-    callbackContext.success("Delete Face");
+    FaceMeDataManager dataManager = new FaceMeDataManager();
+    int result = dataManager.initializeEx(recognizer.getFeatureScheme());
+    if (result < 0) throw new IllegalStateException("Initialize data manager failed: " + result);
+    _dataManager = dataManager;
+
+    boolean success = dataManager.deleteFaceCollection(faceId);
+    if(success){
+      callbackContext.success(1);
+    }else{
+      callbackContext.success(0);
+    }
 
     return true;
   }
@@ -224,7 +234,7 @@ public class FaceMe extends CordovaPlugin {
     FaceHolder holder = _tempHolder;
     updateFaces(holder, username);
     JSONObject faceHolderObject = convertToJsonArray(holder);
-
+    _tempHolder = null;
     callbackContext.success(faceHolderObject);
 
     return true;
@@ -344,6 +354,7 @@ public class FaceMe extends CordovaPlugin {
     JSONObject faceInfoObj = new JSONObject();
     JSONObject boundingBoxObj = new JSONObject();
     JSONObject bitmapInfoObj = new JSONObject();
+    JSONObject faceDataObj = new JSONObject();
 
     faceAttributeObj.put("age", faceHolder.faceAttribute.age);
     faceAttributeObj.put("emotion", faceHolder.faceAttribute.emotion);
@@ -368,11 +379,16 @@ public class FaceMe extends CordovaPlugin {
 
     String croppedFace = bitmapToBase64(faceHolder.faceBitmap);
 
-
+    faceDataObj.put("collectionId", faceHolder.data.collectionId);
+    faceDataObj.put("confidence", faceHolder.data.confidence);
+    faceDataObj.put("faceId", faceHolder.data.faceId);
+    faceDataObj.put("name", faceHolder.data.name);
+    faceDataObj.put("similarity", faceHolder.data.similarity);
 
     faceHolderObj.put("faceAttribute", faceAttributeObj);
     faceHolderObj.put("faceInfo", faceInfoObj);
     faceHolderObj.put("faceBitmap", croppedFace);
+    faceHolderObj.put("faceData", faceDataObj);
 
     return faceHolderObj;
   }
