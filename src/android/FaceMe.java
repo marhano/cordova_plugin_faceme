@@ -74,6 +74,7 @@ public class FaceMe extends CordovaPlugin {
   private CallbackContext execCallback;
   private JSONArray execArgs;
 
+  private FaceHolder _tempHolder;
   private FaceHolder _faceHolder;
   private FaceMeDataManager _dataManager = null;
   private FaceMeRecognizer recognizer = null;
@@ -103,8 +104,7 @@ public class FaceMe extends CordovaPlugin {
       String base64Image = args.getString(0);
       return detectFace(base64Image, callbackContext);
     }else if(ENROLL_FACE.equals(action)){
-      String username = args.getString(0);
-      return enrollFace(username, callbackContext);
+      return enrollFace(callbackContext);
     }else if(RECOGNIZE_FACE.equals(action)){
       return recognizeFace(callbackContext);
     }else if(DELETE_FACE.equals(action)){
@@ -115,7 +115,8 @@ public class FaceMe extends CordovaPlugin {
     }else if(SELECT_FACE.equals(action)){
       return selectFace(callbackContext);
     }else if(ADD_FACE.equals(action)){
-      return addFace(callbackContext);
+      String username = args.getString(0);
+      return addFace(username, callbackContext);
     }
     return false;
   }
@@ -162,7 +163,7 @@ public class FaceMe extends CordovaPlugin {
     return true;
   }
 
-  private boolean enrollFace(String username, CallbackContext callbackContext) throws JSONException{
+  private boolean enrollFace(CallbackContext callbackContext) throws JSONException{
     FaceMeDataManager dataManager = new FaceMeDataManager();
     int result = dataManager.initializeEx(recognizer.getFeatureScheme());
     if (result < 0) throw new IllegalStateException("Initialize data manager failed: " + result);
@@ -173,9 +174,8 @@ public class FaceMe extends CordovaPlugin {
       callbackContext.success(0);
       return true;
     }
-
+    _tempHolder = _faceHolder;
     JSONObject jsonObjectFaceHolder = convertToJsonArray(holder);
-    //updateFace(holder, username);
     callbackContext.success(jsonObjectFaceHolder);
     return true;
   }
@@ -220,8 +220,12 @@ public class FaceMe extends CordovaPlugin {
     return true;
   }
 
-  private boolean addFace(CallbackContext callbackContext){
-    callbackContext.success("Add Face");
+  private boolean addFace(String username, CallbackContext callbackContext) throws JSONException{
+    FaceHolder holder = _tempHolder;
+    updateFaces(holder, username);
+    JSONObject faceHolderObject = convertToJsonArray(holder);
+
+    callbackContext.success(faceHolderObject);
 
     return true;
   }
@@ -363,6 +367,8 @@ public class FaceMe extends CordovaPlugin {
     faceInfoObj.put("confidence", faceHolder.faceInfo.confidence);
 
     String croppedFace = bitmapToBase64(faceHolder.faceBitmap);
+
+
 
     faceHolderObj.put("faceAttribute", faceAttributeObj);
     faceHolderObj.put("faceInfo", faceInfoObj);
