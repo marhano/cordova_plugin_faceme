@@ -8,12 +8,16 @@ xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.a
     <platform name="android">
         <hook type="before_build" src="hooks/before_build.js" />
         <resource-file src="src/android/libs/faceme-6.14.0.aar" target="libs/faceme-6.14.0.aar"/>
+        <resource-file src="src/android/libs/faceme_widgets-6.14.0.aar" target="libs/faceme_widgets-6.14.0.aar"/>
+        <resource-file src="src/android/res/layout/antispoofing_layout.xml" target="res/layout/antispoofing_layout.xml" />
         <config-file parent="/*" target="res/xml/config.xml">
             <feature name="FaceMe">
                 <param name="android-package" value="inc.bastion.faceme.FaceMe" />
             </feature>
         </config-file>
-        <config-file parent="/*" target="AndroidManifest.xml"></config-file>
+        <config-file parent="/*" target="AndroidManifest.xml">
+            <fragment android:name="com.cyberlink.faceme.widget.AntiSpoofingFragment" />
+        </config-file>
         <source-file src="src/android/FaceMe.java" target-dir="src/inc/bastion/faceme/FaceMe" />
         <source-file src="src/android/FaceHolder.java" target-dir="src/inc/bastion/faceme/FaceMe" />
         <source-file src="src/android/FaceData.java" target-dir="src/inc/bastion/faceme/FaceMe" />

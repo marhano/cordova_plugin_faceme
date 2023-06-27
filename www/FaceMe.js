@@ -60,4 +60,8 @@ FaceMe.addFace = function(username, onSuccess, onError){
     exec(onSuccess, onError, PLUGIN_NAME, "addFace", [username]);
 };
 
+FaceMe.startAntiSpoofing = function(onSuccess, onError){
+    exec(onSuccess, onError, PLUGIN_NAME, "startAntiSpoofing", []);
+};
+
 module.exports = FaceMe;

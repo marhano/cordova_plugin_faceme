@@ -17,7 +17,7 @@ module.exports = function(context) {
           var nextLineIndex = buildGradle.indexOf('\n', insertionPoint);
       
           if (nextLineIndex !== -1) {
-            var implementationLine = '    implementation files(\'src/main/libs/faceme-6.14.0.aar\')';
+            var implementationLine = '    implementation files(\'src/main/libs/faceme-6.14.0.aar\') implementation files(\'src/main/libs/faceme_widgets-6.14.0.aar\')';
       
             // Check if the 'implementation' line already exists
             if (buildGradle.includes(implementationLine)) {

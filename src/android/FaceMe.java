@@ -54,6 +54,7 @@ import android.graphics.BitmapFactory;
 
 public class FaceMe extends CordovaPlugin {
   private static final String TAG = "FaceMe";
+  private static final String DEFAULT_LAYOUT_NAME = "antispoofing_layout";
 
   private static final String LICENSE_KEY = "olJ5ziHGlU3FIHWZhhCAq27xJ70q4aMx1lVTK8TI";
   private boolean isLicenseActivated = false;
@@ -70,6 +71,7 @@ public class FaceMe extends CordovaPlugin {
   private static final String UPDATE_FACE = "updateFace";
   private static final String SELECT_FACE = "selectFace";
   private static final String ADD_FACE = "addFace";
+  private static final String START_ANTI_SPOOFING = "startAntiSpoofing";
 
   private CallbackContext execCallback;
   private JSONArray execArgs;
@@ -117,8 +119,15 @@ public class FaceMe extends CordovaPlugin {
     }else if(ADD_FACE.equals(action)){
       String username = args.getString(0);
       return addFace(username, callbackContext);
+    }else if(START_ANTI_SPOOFING.equals(action)){
+      return startAntiSpoofing(callbackContext);
     }
     return false;
+  }
+
+  private boolean startAntiSpoofing(CallbackContext callbackContext){
+    
+    return true;
   }
 
   private boolean testPlugin(CallbackContext callbackContext){
@@ -198,6 +207,8 @@ public class FaceMe extends CordovaPlugin {
     FaceHolder holder = _faceHolder;
     if(updateFaceHolder(holder)){
       callbackContext.success("true");
+    }else{
+      callbackContext.success("false");
     }
     return true;
   }
