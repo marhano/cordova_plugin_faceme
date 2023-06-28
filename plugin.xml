@@ -6,7 +6,6 @@ xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.a
         <clobbers target="FaceMe" />
     </js-module>
     <platform name="android">
-        <hook type="before_build" src="hooks/before_build.js" />
         <resource-file src="src/android/libs/faceme-6.14.0.aar" target="libs/faceme-6.14.0.aar"/>
         <resource-file src="src/android/libs/faceme_widgets-6.14.0.aar" target="libs/faceme_widgets-6.14.0.aar"/>
         <resource-file src="src/android/activity_anti_spoofing.xml" target="res/layout/activity_anti_spoofing.xml" />
