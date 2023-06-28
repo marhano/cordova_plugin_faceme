@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+  CyberLink FaceMe (R) SDK
+  Copyright (C) CyberLink Corp. All rights reserved.
+  https://www.cyberlink.com
+-->
+<resources>
+
+    <!-- 2D Anti-Spoofing -->
+    <string name="demo_fm_2das_subtitle">Bastion</string>
+    <string name="demo_fm_2das_center_your_face">Center your face in the circle</string>
+    <string name="demo_fm_2das_center_your_face_look_straight">Center your face in the circle and look directly into the camera</string>
+    <string name="demo_fm_2das_stay_face_in_center">Don\'t Move</string>
+    <string name="demo_fm_2das_face_come_closer">Come Closer</string>
+    <string name="demo_fm_2das_face_go_farther">Move Back</string>
+    <string name="demo_fm_2das_processing">Processing&#8230;</string>
+    <string name="demo_fm_2das_alert_env_dark">Lighting is not sufficient</string>
+    <string name="demo_fm_2das_alert_env_dark_desc">Move to a brighter location, ensure your face is not backlit, and then try again.</string>
+    <string name="demo_fm_2das_turn_left">Turn Head Left</string>
+    <string name="demo_fm_2das_turn_left_desc">Turn your head to the left slowly</string>
+    <string name="demo_fm_2das_turn_right">Turn Head Right</string>
+    <string name="demo_fm_2das_turn_right_desc">Turn your head to the right slowly</string>
+    <string name="demo_fm_2das_smile">Please Smile</string>
+    <string name="demo_fm_2das_smile_desc">Please Smile</string>
+    <string name="demo_fm_2das_nod">Nod your head down</string>
+    <string name="demo_fm_2das_nod_desc">Nod your head down</string>
+    <string name="demo_fm_2das_blink">Blink both of your eyes</string>
+    <string name="demo_fm_2das_blink_desc">Blink both of your eyes</string>
+    <string name="demo_fm_2das_speech">Read the Numbers</string>
+    <string name="demo_fm_2das_speech_desc">Please read the numbers one by one</string>
+    <string name="demo_fm_2das_speech_language_mandarin">Mandarin</string>
+    <string name="demo_fm_2das_speech_language_english">English</string>
+
+</resources>
