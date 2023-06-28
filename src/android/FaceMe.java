@@ -11,7 +11,6 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 import com.cyberlink.faceme.DetectionMode;
 import com.cyberlink.faceme.DetectionModelSpeedLevel;
@@ -23,7 +22,6 @@ import com.cyberlink.faceme.ExtractionModelSpeedLevel;
 import com.cyberlink.faceme.ExtractionOption;
 import com.cyberlink.faceme.FaceAttribute;
 import com.cyberlink.faceme.FaceFeature;
-import com.cyberlink.faceme.FaceFeatureScheme;
 import com.cyberlink.faceme.FaceInfo;
 import com.cyberlink.faceme.FaceLandmark;
 import com.cyberlink.faceme.FaceMeDataManager;
@@ -36,14 +34,17 @@ import com.cyberlink.faceme.RecognizerMode;
 import com.cyberlink.faceme.LicenseManager;
 import com.cyberlink.faceme.ReturnCode;
 import com.cyberlink.faceme.SimilarFaceResult;
+import com.cyberlink.faceme.widget.AntiSpoofingFragment;
 
+import inc.bastion.faceme.AntiSpoofingActivity;
 import inc.bastion.faceme.FaceHolder;
-import inc.bastion.faceme.RectUtil;
 import inc.bastion.faceme.LicenseUtils;
+import inc.bastion.faceme.RectUtil;
+import io.ionic.starter.R;
 
+import android.app.Application;
+import android.content.Intent;
 import android.graphics.Matrix;
-import android.nfc.Tag;
-import android.telecom.Call;
 import android.util.Base64;
 import android.content.Context;
 import android.util.Log;
@@ -51,9 +52,11 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.util.Size;
 import android.graphics.BitmapFactory;
+import android.content.res.Resources;
 
 public class FaceMe extends CordovaPlugin {
   private static final String TAG = "FaceMe";
+  private AntiSpoofingFragment asFragment;
   private static final String DEFAULT_LAYOUT_NAME = "antispoofing_layout";
 
   private static final String LICENSE_KEY = "olJ5ziHGlU3FIHWZhhCAq27xJ70q4aMx1lVTK8TI";
@@ -126,11 +129,16 @@ public class FaceMe extends CordovaPlugin {
   }
 
   private boolean startAntiSpoofing(CallbackContext callbackContext){
-    
+    Intent intent = new Intent(cordova.getActivity(), AntiSpoofingActivity.class);
+    cordova.getActivity().startActivity(intent);
+
     return true;
   }
 
   private boolean testPlugin(CallbackContext callbackContext){
+    Intent intent = new Intent(cordova.getActivity(), AntiSpoofingActivity.class);
+    cordova.getActivity().startActivity(intent);
+
     callbackContext.success("PLUGIN TEST ABCD 1234");
 
     return true;
