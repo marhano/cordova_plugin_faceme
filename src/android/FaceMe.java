@@ -199,17 +199,17 @@ public class FaceMe extends CordovaPlugin {
     if(_recognizer == null || bitmap.getHeight() != maxFrameHeight || bitmap.getHeight() != maxFrameWidth){
       maxFrameHeight = bitmap.getHeight();
       maxFrameWidth = bitmap.getWidth();
-      releaseRecognizer();
-      initRecognizer();
     }
 
     extractFaceFromImage(bitmap);
-
     FaceHolder holder = _faceHolder;
-    if(updateFaceHolder(holder)){
+
+    if(checkSimilarFace(holder)){
       callbackContext.success(0);
     }else{
-      callbackContext.success(1);
+      _tempHolder = holder;
+      JSONObject jsonObject = convertToJsonArray(holder);
+      callbackContext.success(jsonObject);
     }
   }
 
@@ -224,7 +224,7 @@ public class FaceMe extends CordovaPlugin {
       Log.d(TAG, "FaceFeature");
     }
     FaceHolder holder = _faceHolder;
-    if(updateFaceHolder(holder)){
+    if(checkSimilarFace(holder)){
       callbackContext.success("true");
     }else{
       callbackContext.success("false");
@@ -265,7 +265,7 @@ public class FaceMe extends CordovaPlugin {
     return true;
   }
 
-  private boolean updateFaceHolder(FaceHolder faceHolder){
+  private boolean checkSimilarFace(FaceHolder faceHolder){
     if(_dataManager == null) return false;
     float confidenceThreshold = _dataManager.getPrecisionThreshold(PrecisionLevel.LEVEL_1E6);
 

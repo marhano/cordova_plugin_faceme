@@ -246,7 +246,7 @@ public class AntiSpoofingActivity extends AppCompatActivity implements AntiSpoof
     layoutSetting.actionDetailHintFontSize = 16;
     layoutSetting.actionDetailHintFont = exoRegular;
 
-    layoutSetting.showFPS = true;
+    layoutSetting.showFPS = false;
 
     layoutSetting.progressBarForegroundColor = Color.rgb(58, 141, 222);
     layoutSetting.progressBarBackgroundColor = Color.argb(0x55, 255, 80, 25);
