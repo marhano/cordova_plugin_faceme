@@ -204,6 +204,11 @@ public class FaceMe extends CordovaPlugin {
     extractFaceFromImage(bitmap);
     FaceHolder holder = _faceHolder;
 
+    if(holder == null){
+      callbackContext.success(1);
+      return;
+    }
+
     if(checkSimilarFace(holder)){
       callbackContext.success(0);
     }else{
@@ -442,6 +447,8 @@ public class FaceMe extends CordovaPlugin {
       Bitmap faceImage = getCropFaceBitmap(bitmap, faceInfo.boundingBox);
       FaceHolder face = new FaceHolder(faceInfo, landmark, attribute, faceFeature, faceImage);
       _faceHolder = face;
+    }else{
+      _faceHolder = null;
     }
   }
 
