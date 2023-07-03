@@ -19,7 +19,7 @@ xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.a
         <config-file parent="/manifest/application" target="AndroidManifest.xml">
             <activity
                 android:name="inc.bastion.faceme.AntiSpoofingActivity"
-                android:theme="@style/Theme.AppCompat"
+                android:theme="@style/Theme.AppCompat.NoActionBar"
                 android:exported="false">
                 <meta-data
                     android:name="android.app.lib_name"

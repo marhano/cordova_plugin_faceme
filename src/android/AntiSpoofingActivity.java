@@ -1,9 +1,11 @@
 package inc.bastion.faceme;
 
+import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -11,17 +13,51 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.cyberlink.faceme.DetectionMode;
+import com.cyberlink.faceme.DetectionModelSpeedLevel;
+import com.cyberlink.faceme.DetectionOutputOrder;
+import com.cyberlink.faceme.EnginePreference;
+import com.cyberlink.faceme.ExtractConfig;
+import com.cyberlink.faceme.ExtractionModelSpeedLevel;
+import com.cyberlink.faceme.ExtractionOption;
+import com.cyberlink.faceme.FaceAttribute;
+import com.cyberlink.faceme.FaceFeature;
 import com.cyberlink.faceme.FaceInfo;
+import com.cyberlink.faceme.FaceLandmark;
+import com.cyberlink.faceme.FaceMeDataManager;
+import com.cyberlink.faceme.FaceMeRecognizer;
+import com.cyberlink.faceme.FaceMeSdk;
+import com.cyberlink.faceme.LicenseManager;
+import com.cyberlink.faceme.LicenseOption;
+import com.cyberlink.faceme.QueryResult;
+import com.cyberlink.faceme.RecognizerConfig;
+import com.cyberlink.faceme.RecognizerMode;
+import com.cyberlink.faceme.SimilarFaceResult;
 import com.cyberlink.faceme.SpeechFeature;
 import com.cyberlink.faceme.widget.AntiSpoofingCallbackV2;
 import com.cyberlink.faceme.widget.AntiSpoofingConfig;
 import com.cyberlink.faceme.widget.AntiSpoofingFragment;
 import com.cyberlink.faceme.widget.LocalizedKey;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import io.ionic.starter.R;
 
 public class AntiSpoofingActivity extends AppCompatActivity implements AntiSpoofingCallbackV2{
+  private final String TAG = "AntiSpoofingActivity";
   private AntiSpoofingFragment asFragment;
+  private float confidenceThreshold;
+  private FaceMeRecognizer _recognizer;
+  private ExtractConfig _extractConfig;
+  private FaceMeDataManager _dataManager;
+  private Boolean hasRecognitionFeature;
+  private ExecutorService sdkThread;
+  private int frameWidth = 720;
+  private int frameHeight = 1280;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +67,7 @@ public class AntiSpoofingActivity extends AppCompatActivity implements AntiSpoof
     asFragment = (AntiSpoofingFragment) getSupportFragmentManager().findFragmentById(R.id.fm_antispoofing_fragment);
     asFragment.setAntiSpoofingCallback(this);
 
+    initSdkComponents();
     initDetectSetting();
     initLayoutSetting();
 
@@ -46,6 +83,106 @@ public class AntiSpoofingActivity extends AppCompatActivity implements AntiSpoof
     }
 
     asFragment.startDetection();
+  }
+
+  private void initSdkComponents() {
+    if (isFinishing() || isDestroyed()) return;
+
+    if (sdkThread == null) {
+      sdkThread = Executors.newSingleThreadExecutor();
+    }
+    sdkThread.submit(this::initSdkEngine);
+  }
+
+  @WorkerThread
+  private void initSdkEngine() {
+    releaseSdkEngine();
+
+    try {
+      checkLicense();
+      initRecognizer();
+      initDataManager();
+    } catch (Exception e) {
+      Log.d(TAG,"Initialize SDK failed:\n" + e.getMessage());
+    }
+  }
+
+  private void checkLicense() {
+    LicenseManager licenseManager = null;
+    try {
+      licenseManager = new LicenseManager();
+      licenseManager.initializeEx();
+      licenseManager.registerLicense();
+
+      Object value = licenseManager.getProperty(LicenseOption.EXTRACTION);
+      if (value instanceof Boolean) {
+        hasRecognitionFeature = (Boolean) value;
+      }
+    } finally {
+      if (licenseManager != null) licenseManager.release();
+    }
+  }
+
+  private void initRecognizer(){
+    FaceMeRecognizer recognizer = null;
+    int result;
+    try {
+      recognizer = new FaceMeRecognizer();
+      RecognizerConfig recognizerConfig = new RecognizerConfig();
+      recognizerConfig.preference = EnginePreference.PREFER_NONE;
+      recognizerConfig.detectionModelSpeedLevel = DetectionModelSpeedLevel.DEFAULT;
+      recognizerConfig.maxDetectionThreads = 2;
+      recognizerConfig.extractionModelSpeedLevel = ExtractionModelSpeedLevel.VH6;
+      recognizerConfig.maxExtractionThreads = 2;
+      recognizerConfig.mode = RecognizerMode.IMAGE;
+      recognizerConfig.maxFrameHeight = frameHeight;
+      recognizerConfig.maxFrameWidth = frameWidth;
+      recognizerConfig.minFaceWidthRatio = 0.05f;
+      result = recognizer.initializeEx(recognizerConfig);
+      if (result < 0) throw new IllegalStateException("Initialize recognizer failed: " + result);
+
+      recognizer.setExtractionOption(ExtractionOption.DETECTION_OUTPUT_ORDER, DetectionOutputOrder.CONFIDENCE);
+      recognizer.setExtractionOption(ExtractionOption.DETECTION_MODE, DetectionMode.NORMAL);
+
+      _recognizer = recognizer;
+      confidenceThreshold = recognizer.getFeatureScheme().threshold_1_1e6;
+
+      _extractConfig = new ExtractConfig();
+      _extractConfig.extractBoundingBox = true;
+      _extractConfig.extractFeature = true;
+    } catch (Exception e) {
+      if (recognizer != null) recognizer.release();
+      throw e;
+    }
+  }
+
+  private void initDataManager() {
+    FaceMeDataManager dataManager = null;
+    int result;
+    try {
+      dataManager = new FaceMeDataManager();
+      result = dataManager.initializeEx(_recognizer.getFeatureScheme());
+      if (result < 0) throw new IllegalStateException("Initialize data manager failed: " + result);
+
+      _dataManager = dataManager;
+    } catch (Exception e) {
+      if (dataManager != null) dataManager.release();
+      throw e;
+    }
+  }
+
+  @WorkerThread
+  private void releaseSdkEngine() {
+    hasRecognitionFeature = false;
+
+    if (_recognizer != null) {
+      _recognizer.release();
+      _recognizer = null;
+    }
+    if (_dataManager != null) {
+      _dataManager.release();
+      _dataManager = null;
+    }
   }
 
   private void initDetectSetting(){
@@ -152,7 +289,25 @@ public class AntiSpoofingActivity extends AppCompatActivity implements AntiSpoof
   }
 
   @Override
-  public void onAntiSpoofingResult(Bitmap bitmap, FaceInfo faceInfo, int i, double v, int i1, SpeechFeature speechFeature) {
+  public void onAntiSpoofingResult(Bitmap bitmap, FaceInfo face, int i, double v, int i1, SpeechFeature speechFeature) {
+    boolean hasSimilarFace = false;
+    int facesCount = _recognizer.extractFace(_extractConfig, Collections.singletonList(bitmap));
+    if (facesCount > 0) {
+      ArrayList<FaceHolder> faces = new ArrayList<>();
+      for (int faceIndex = 0; faceIndex < facesCount; faceIndex++) {
+        FaceFeature faceFeature = _recognizer.getFaceFeature(0, faceIndex);
 
+        List<SimilarFaceResult> searchResult = _dataManager.searchSimilarFace(confidenceThreshold, -1, faceFeature, 1);
+        if (searchResult != null && !searchResult.isEmpty()) {
+          hasSimilarFace = true;
+        }else{
+          hasSimilarFace = false;
+        }
+      }
+      Intent resultIntent = new Intent();
+      resultIntent.putExtra("hasSimilarFace", hasSimilarFace);
+      setResult(RESULT_OK, resultIntent);
+      finish();
+    }
   }
 }

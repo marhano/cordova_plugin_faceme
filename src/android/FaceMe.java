@@ -42,6 +42,7 @@ import inc.bastion.faceme.LicenseUtils;
 import inc.bastion.faceme.RectUtil;
 import io.ionic.starter.R;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.Intent;
 import android.graphics.Matrix;
@@ -75,6 +76,9 @@ public class FaceMe extends CordovaPlugin {
   private static final String SELECT_FACE = "selectFace";
   private static final String ADD_FACE = "addFace";
   private static final String START_ANTI_SPOOFING = "startAntiSpoofing";
+
+  private CallbackContext startAntiSpoofingCallbackContext;
+  private static final int ANTI_SPOOFING_REQUEST_CODE = 123;
 
   private CallbackContext execCallback;
   private JSONArray execArgs;
@@ -128,18 +132,34 @@ public class FaceMe extends CordovaPlugin {
     return false;
   }
 
-  private boolean startAntiSpoofing(CallbackContext callbackContext){
-    Intent intent = new Intent(cordova.getActivity(), AntiSpoofingActivity.class);
-    cordova.getActivity().startActivity(intent);
+  @Override
+  public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+
+    if (requestCode == ANTI_SPOOFING_REQUEST_CODE) {
+      if (resultCode == Activity.RESULT_OK) {
+        boolean hasSimilarFace = data.getBooleanExtra("hasSimilarFace", false);
+        startAntiSpoofingCallbackContext.success(hasSimilarFace ? 1 : 0); // Return 1 for true, 0 for false
+      } else {
+        startAntiSpoofingCallbackContext.error("Anti-spoofing activity result canceled or failed");
+      }
+    }
+  }
+
+  private boolean testPlugin(CallbackContext callbackContext){
+    startAntiSpoofingCallbackContext = callbackContext;
+
+    cordova.getActivity().runOnUiThread(() -> {
+      Intent intent = new Intent(cordova.getActivity(), AntiSpoofingActivity.class);
+      cordova.startActivityForResult(this, intent, ANTI_SPOOFING_REQUEST_CODE);
+    });
 
     return true;
   }
 
-  private boolean testPlugin(CallbackContext callbackContext){
+  private boolean startAntiSpoofing(CallbackContext callbackContext){
     Intent intent = new Intent(cordova.getActivity(), AntiSpoofingActivity.class);
     cordova.getActivity().startActivity(intent);
-
-    callbackContext.success("PLUGIN TEST ABCD 1234");
 
     return true;
   }
@@ -336,10 +356,6 @@ public class FaceMe extends CordovaPlugin {
     }
 
     return dataManager.setFaceCollectionName(collectionId, newName);
-  }
-
-  private void getAllFaceCollection(FaceHolder faceHolder){
-
   }
 
   private boolean deactivateLicense(CallbackContext callbackContext){

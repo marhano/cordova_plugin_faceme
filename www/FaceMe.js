@@ -36,8 +36,8 @@ FaceMe.detectFace = function(base64Image, onSuccess, onError){
     exec(onSuccess, onError, PLUGIN_NAME, "detectFace", [base64Image]);
 };
 
-FaceMe.enrollFace = function(onSuccess, onError){
-    exec(onSuccess, onError, PLUGIN_NAME, "enrollFace", []);
+FaceMe.enrollFace = function(base64Image, onSuccess, onError){
+    exec(onSuccess, onError, PLUGIN_NAME, "enrollFace", [base64Image]);
 };
 
 FaceMe.recognizeFace = function(onSuccess, onError){
