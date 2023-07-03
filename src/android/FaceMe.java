@@ -8,9 +8,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.cyberlink.faceme.DetectionMode;
 import com.cyberlink.faceme.DetectionModelSpeedLevel;
@@ -34,16 +35,8 @@ import com.cyberlink.faceme.RecognizerMode;
 import com.cyberlink.faceme.LicenseManager;
 import com.cyberlink.faceme.ReturnCode;
 import com.cyberlink.faceme.SimilarFaceResult;
-import com.cyberlink.faceme.widget.AntiSpoofingFragment;
-
-import inc.bastion.faceme.AntiSpoofingActivity;
-import inc.bastion.faceme.FaceHolder;
-import inc.bastion.faceme.LicenseUtils;
-import inc.bastion.faceme.RectUtil;
-import io.ionic.starter.R;
 
 import android.app.Activity;
-import android.app.Application;
 import android.content.Intent;
 import android.graphics.Matrix;
 import android.util.Base64;
@@ -53,15 +46,15 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.util.Size;
 import android.graphics.BitmapFactory;
-import android.content.res.Resources;
+
+import androidx.annotation.WorkerThread;
 
 public class FaceMe extends CordovaPlugin {
   private static final String TAG = "FaceMe";
-  private AntiSpoofingFragment asFragment;
-  private static final String DEFAULT_LAYOUT_NAME = "antispoofing_layout";
 
   private static final String LICENSE_KEY = "olJ5ziHGlU3FIHWZhhCAq27xJ70q4aMx1lVTK8TI";
   private boolean isLicenseActivated = false;
+  private ExecutorService sdkThread;
 
   //INITIAL METHODS FOR PROTOTYPE
   private static final String TEST_PLUGIN = "testPlugin";
@@ -80,19 +73,14 @@ public class FaceMe extends CordovaPlugin {
   private CallbackContext startAntiSpoofingCallbackContext;
   private static final int ANTI_SPOOFING_REQUEST_CODE = 123;
 
-  private CallbackContext execCallback;
-  private JSONArray execArgs;
-
   private FaceHolder _tempHolder;
   private FaceHolder _faceHolder;
   private FaceMeDataManager _dataManager = null;
-  private FaceMeRecognizer recognizer = null;
+  private FaceMeRecognizer _recognizer = null;
   private ExtractConfig extractConfig = null;
 
   private int maxFrameHeight = 1280;
   private int maxFrameWidth = 720;
-
-  private static final int MIN_COORDINATE = 0;
 
   public FaceMe(){
       super();
@@ -106,14 +94,25 @@ public class FaceMe extends CordovaPlugin {
     }else if(INITIALIZE_SDK.equals(action)){
       return initializeSDK(callbackContext);
     }else if(ACTIVATE_LICENSE.equals(action)){
-      return activateLicense(callbackContext);
+      cordova.getThreadPool().execute(() -> activateLicense(callbackContext));
+      return true;
     }else if(DEACTIVATE_LICENSE.equals(action)){
-      return deactivateLicense(callbackContext);
+      cordova.getThreadPool().execute(() -> deactivateLicense(callbackContext));
+      return true;
     }else if(DETECT_FACE.equals(action)){
       String base64Image = args.getString(0);
-      return detectFace(base64Image, callbackContext);
+      detectFace(base64Image, callbackContext);
+      return true;
     }else if(ENROLL_FACE.equals(action)){
-      return enrollFace(callbackContext);
+      String base64Image = args.getString(0);
+      cordova.getThreadPool().execute(() -> {
+        try {
+          enrollFace(base64Image, callbackContext);
+        } catch (JSONException e) {
+          e.printStackTrace();
+        }
+      });
+      return true;
     }else if(RECOGNIZE_FACE.equals(action)){
       return recognizeFace(callbackContext);
     }else if(DELETE_FACE.equals(action)){
@@ -168,68 +167,60 @@ public class FaceMe extends CordovaPlugin {
     Context context = this.cordova.getActivity().getApplicationContext();
     FaceMeSdk.initialize(context, LICENSE_KEY);
 
-    LicenseManager licenseManager = null;
-    licenseManager = new LicenseManager();
+    LicenseManager licenseManager = new LicenseManager();
     int result = licenseManager.initializeEx();
     result = licenseManager.registerLicense();
     licenseManager.release();
 
     if(result == 0){
-      callbackContext.success("SDK initialized successfully");
-    }else{
-      callbackContext.success("SDK initialized failed: Server Error" + result);
+      initSdkComponents();
     }
-
+    callbackContext.success(result);
     return true;
   }
 
-  private boolean detectFace(String base64Image, CallbackContext callbackContext) throws JSONException{
+  private void detectFace(String base64Image, CallbackContext callbackContext) throws JSONException{
     Bitmap bitmap = base64ToBitmap(base64Image);
-    if(recognizer == null || bitmap.getHeight() != maxFrameHeight || bitmap.getHeight() != maxFrameWidth){
+    if(_recognizer == null || bitmap.getHeight() != maxFrameHeight || bitmap.getHeight() != maxFrameWidth){
       maxFrameHeight = bitmap.getHeight();
       maxFrameWidth = bitmap.getWidth();
       releaseRecognizer();
-      initializeRecognizer();
+      initRecognizer();
     }
-
     JSONObject jsonObjectFaceHolder = extractFace(bitmap);
 
-    if(isLicenseActivated == true && jsonObjectFaceHolder != null){
+    if(isLicenseActivated && jsonObjectFaceHolder != null){
       callbackContext.success(jsonObjectFaceHolder);
     }
-    return true;
   }
 
-  private boolean enrollFace(CallbackContext callbackContext) throws JSONException{
-    FaceMeDataManager dataManager = new FaceMeDataManager();
-    int result = dataManager.initializeEx(recognizer.getFeatureScheme());
-    if (result < 0) throw new IllegalStateException("Initialize data manager failed: " + result);
-    _dataManager = dataManager;
+  private void enrollFace(String base64Image, CallbackContext callbackContext) throws JSONException{
+    Bitmap bitmap = base64ToBitmap(base64Image);
+    if(_recognizer == null || bitmap.getHeight() != maxFrameHeight || bitmap.getHeight() != maxFrameWidth){
+      maxFrameHeight = bitmap.getHeight();
+      maxFrameWidth = bitmap.getWidth();
+      releaseRecognizer();
+      initRecognizer();
+    }
+
+    extractFaceFromImage(bitmap);
 
     FaceHolder holder = _faceHolder;
     if(updateFaceHolder(holder)){
       callbackContext.success(0);
-      return true;
+    }else{
+      callbackContext.success(1);
     }
-    _tempHolder = _faceHolder;
-    JSONObject jsonObjectFaceHolder = convertToJsonArray(holder);
-    callbackContext.success(jsonObjectFaceHolder);
-    return true;
   }
 
   private boolean recognizeFace(CallbackContext callbackContext){
-    FaceMeDataManager dataManager = new FaceMeDataManager();
-    int result = dataManager.initializeEx(recognizer.getFeatureScheme());
-    if (result < 0) throw new IllegalStateException("Initialize data manager failed: " + result);
-    _dataManager = dataManager;
-
     long collectionId = 0;
-    QueryResult queryResult = dataManager.queryFaceCollection(0, 1);
+    QueryResult queryResult = _dataManager.queryFaceCollection(0, 1);
     if(queryResult != null || queryResult.resultIds.isEmpty()){
       collectionId = queryResult.resultIds.get(0);
-      QueryResult queryFace = dataManager.queryFace(collectionId, 0, 1);
+      QueryResult queryFace = _dataManager.queryFace(collectionId, 0, 1);
       long faceId = queryFace.resultIds.get(0);
-      FaceFeature faceFeature = dataManager.getFaceFeature(faceId);
+      FaceFeature faceFeature = _dataManager.getFaceFeature(faceId);
       Log.d(TAG, "FaceFeature");
     }
     FaceHolder holder = _faceHolder;
@@ -242,12 +233,7 @@ public class FaceMe extends CordovaPlugin {
   }
 
   private boolean deleteFace(long faceId, CallbackContext callbackContext){
-    FaceMeDataManager dataManager = new FaceMeDataManager();
-    int result = dataManager.initializeEx(recognizer.getFeatureScheme());
-    if (result < 0) throw new IllegalStateException("Initialize data manager failed: " + result);
-    _dataManager = dataManager;
-
-    boolean success = dataManager.deleteFaceCollection(faceId);
+    boolean success = _dataManager.deleteFaceCollection(faceId);
     if(success){
       callbackContext.success(1);
     }else{
@@ -358,7 +344,7 @@ public class FaceMe extends CordovaPlugin {
     return dataManager.setFaceCollectionName(collectionId, newName);
   }
 
-  private boolean deactivateLicense(CallbackContext callbackContext){
+  private void deactivateLicense(CallbackContext callbackContext){
     Context context = this.cordova.getActivity().getApplicationContext();
     LicenseUtils licenseUtils = new LicenseUtils();
     FaceMeSdk.initialize(context, LICENSE_KEY);
@@ -367,10 +353,9 @@ public class FaceMe extends CordovaPlugin {
         isLicenseActivated = false;
     }
     callbackContext.success(isDeactivated);
-    return true;
   }
 
-  private boolean activateLicense(CallbackContext callbackContext){
+  private void activateLicense(CallbackContext callbackContext){
     Context context = this.cordova.getActivity().getApplicationContext();
     LicenseUtils licenseUtils = new LicenseUtils();
     FaceMeSdk.initialize(context, LICENSE_KEY);
@@ -379,7 +364,6 @@ public class FaceMe extends CordovaPlugin {
       isLicenseActivated = true;
     }
     callbackContext.success(isLicenseValid);
-    return true;
   }
 
   private JSONObject convertToJsonArray(FaceHolder faceHolder) throws JSONException{
@@ -428,35 +412,15 @@ public class FaceMe extends CordovaPlugin {
     return faceHolderObj;
   }
 
-  private JSONObject extractBitmap(Bitmap bitmap) throws JSONException{
-    int facesCount = recognizer.extractFace(extractConfig, Collections.singletonList(bitmap));
-    ArrayList<FaceHolder> faces = new ArrayList<>();
-    JSONObject jsonObjectFaceHolder = null;
-    if (facesCount > 0) {
-      for (int faceIndex = 0; faceIndex < facesCount; faceIndex++) {
-        FaceInfo faceInfo = recognizer.getFaceInfo(0, faceIndex);
-        FaceLandmark faceLandmark = recognizer.getFaceLandmark(0, faceIndex);
-        FaceAttribute faceAttr = recognizer.getFaceAttribute(0, faceIndex);
-        FaceFeature faceFeature = recognizer.getFaceFeature(0, faceIndex);
-
-        Bitmap faceBitmap = getCropFaceBitmap(bitmap, faceInfo.boundingBox);
-
-        FaceHolder holder = new FaceHolder(faceInfo, faceLandmark, faceAttr, faceFeature, faceBitmap);
-        faces.add(holder);
-      }
-      //jsonObjectFaceHolder = convertToJsonArray(faces);
-    }
-    return jsonObjectFaceHolder;
-  }
-
+  //Return JsonObject with "ALL" data
   private JSONObject extractFace(Bitmap bitmap) throws  JSONException{
-    int facesCount = recognizer.extractFace(extractConfig, Collections.singletonList(bitmap));
+    int facesCount = _recognizer.extractFace(extractConfig, Collections.singletonList(bitmap));
     JSONObject jsonObjectFaceHolder = null;
     if (facesCount > 0) {
-      FaceInfo faceInfo = recognizer.getFaceInfo(0, 0);
-      FaceLandmark landmark = recognizer.getFaceLandmark(0, 0);
-      FaceAttribute attribute = recognizer.getFaceAttribute(0, 0);
-      FaceFeature faceFeature = recognizer.getFaceFeature(0, 0);
+      FaceInfo faceInfo = _recognizer.getFaceInfo(0, 0);
+      FaceLandmark landmark = _recognizer.getFaceLandmark(0, 0);
+      FaceAttribute attribute = _recognizer.getFaceAttribute(0, 0);
+      FaceFeature faceFeature = _recognizer.getFaceFeature(0, 0);
 
       Bitmap faceImage = getCropFaceBitmap(bitmap, faceInfo.boundingBox);
       FaceHolder face = new FaceHolder(faceInfo, landmark, attribute, faceFeature, faceImage);
@@ -465,6 +429,20 @@ public class FaceMe extends CordovaPlugin {
       return jsonObjectFaceHolder;
     }
     return null;
+  }
+
+  private void extractFaceFromImage(Bitmap bitmap) throws  JSONException{
+    int facesCount = _recognizer.extractFace(extractConfig, Collections.singletonList(bitmap));
+    if (facesCount > 0) {
+      FaceInfo faceInfo = _recognizer.getFaceInfo(0, 0);
+      FaceLandmark landmark = _recognizer.getFaceLandmark(0, 0);
+      FaceAttribute attribute = _recognizer.getFaceAttribute(0, 0);
+      FaceFeature faceFeature = _recognizer.getFaceFeature(0, 0);
+
+      Bitmap faceImage = getCropFaceBitmap(bitmap, faceInfo.boundingBox);
+      FaceHolder face = new FaceHolder(faceInfo, landmark, attribute, faceFeature, faceImage);
+      _faceHolder = face;
+    }
   }
 
   // CONFIGURE BITMAP IMAGE DISPLAY
@@ -487,23 +465,54 @@ public class FaceMe extends CordovaPlugin {
   }
 
   private void releaseRecognizer(){
-    if(recognizer != null){
-      recognizer.release();
-      recognizer = null;
+    if(_recognizer != null){
+      _recognizer.release();
+      _recognizer = null;
     }
   }
 
-  private void configure(){
-    if(recognizer == null){
+  private void initSdkComponents(){
+    if(sdkThread == null){
+      sdkThread = Executors.newSingleThreadExecutor();
+    }
+    sdkThread.submit(this::initSdkEngine);
+  }
+  @WorkerThread
+  private void initSdkEngine(){
+    releaseSdkEngine();
+
+    try{
+      initRecognizer();
+      initDataManager();
+    }catch (Exception e){
+      Log.d(TAG,"Initialize SDK failed:\n" + e.getMessage());
+    }
+  }
+
+  @WorkerThread
+  private void releaseSdkEngine(){
+    if(_recognizer != null){
+      _recognizer.release();
+      _recognizer = null;
+    }
+
+    if(_dataManager != null){
+      _dataManager.release();
+      _dataManager = null;
+    }
+  }
+
+  private void configExtraction(){
+    if(_recognizer == null){
       return;
     }
 
-    recognizer.setExtractionOption(
+    _recognizer.setExtractionOption(
       ExtractionOption.DETECTION_SPEED_LEVEL, DetectionSpeedLevel.PRECISE);
-    recognizer.setExtractionOption(
+    _recognizer.setExtractionOption(
       ExtractionOption.DETECTION_OUTPUT_ORDER,
       DetectionOutputOrder.CONFIDENCE);
-    recognizer.setExtractionOption(
+    _recognizer.setExtractionOption(
       ExtractionOption.DETECTION_MODE, DetectionMode.NORMAL);
 
     extractConfig = new ExtractConfig();
@@ -517,12 +526,12 @@ public class FaceMe extends CordovaPlugin {
     extractConfig.extractOcclusion = true;
   }
 
-  private void initializeRecognizer(){
+  private void initRecognizer(){
     int result;
     try {
       releaseRecognizer();
 
-      recognizer = new FaceMeRecognizer();
+      _recognizer = new FaceMeRecognizer();
       RecognizerConfig recognizerConfig = new RecognizerConfig();
       recognizerConfig.preference = EnginePreference.PREFER_NONE;
       recognizerConfig.detectionModelSpeedLevel = DetectionModelSpeedLevel.DEFAULT;
@@ -533,11 +542,26 @@ public class FaceMe extends CordovaPlugin {
       recognizerConfig.maxFrameHeight = maxFrameHeight;
       recognizerConfig.maxFrameWidth = maxFrameWidth;
       recognizerConfig.minFaceWidthRatio = 0.05f;
-      result = recognizer.initializeEx(recognizerConfig);
+      result = _recognizer.initializeEx(recognizerConfig);
       if (result < 0) throw new IllegalStateException("Initialize recognizer failed: " + result);
-      configure();
+      configExtraction();
     } catch (Exception e) {
       releaseRecognizer();
+      throw e;
+    }
+  }
+
+  private void initDataManager() {
+    FaceMeDataManager dataManager = null;
+    int result;
+    try {
+      dataManager = new FaceMeDataManager();
+      result = dataManager.initializeEx(_recognizer.getFeatureScheme());
+      if (result < 0) throw new IllegalStateException("Initialize data manager failed: " + result);
+
+      _dataManager = dataManager;
+    } catch (Exception e) {
+      if (dataManager != null) dataManager.release();
       throw e;
     }
   }
