@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout 
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -13,4 +13,56 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" />
 
+  <View
+    android:id="@+id/viewCenterAnchor"
+    android:layout_width="1dp"
+    android:layout_height="1dp"
+    android:layout_centerHorizontal="true"
+    tools:layout_centerInParent="true"/>
+
+  <RelativeLayout
+    android:id="@+id/resultLayoutView"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/viewCenterAnchor"
+    android:layout_marginTop="36dp"
+    android:layout_marginLeft="60dp"
+    android:layout_marginRight="60dp"
+    android:layout_centerHorizontal="true"
+    android:gravity="center_horizontal"
+    android:visibility="gone"
+    tools:visibility="visible">
+    <TextView
+      android:id="@+id/txtResultTitle"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_centerHorizontal="true"
+      android:gravity="center_horizontal"
+      android:lineHeight="36dp"
+      android:textColor="#000000"
+      android:textSize="26dp"
+      android:text="Hi, Amy!"
+      />
+    <TextView
+      android:id="@+id/txtResultSubtitle"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_centerHorizontal="true"
+      android:layout_below="@id/txtResultTitle"
+      android:layout_marginTop="30dp"
+      android:gravity="center_horizontal"
+      android:lineHeight="36dp"
+      android:textColor="#505050"
+      android:textSize="21dp"
+      android:text="Visits: 32\nConfidence: 87%"
+      />
+  </RelativeLayout>
+
+<!--  <ImageView-->
+<!--    android:id="@+id/btnDump"-->
+<!--    style="@style/Theme.AppCompat"-->
+<!--    android:layout_alignParentRight="true"-->
+<!--    android:layout_marginTop="12dp"-->
+<!--    android:layout_marginRight="12dp"-->
+<!--    android:src="@drawable/fm_ic_as_face_right" />-->
 </RelativeLayout>
