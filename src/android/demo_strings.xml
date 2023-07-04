@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+  CyberLink FaceMe (R) SDK
+  Copyright (C) CyberLink Corp. All rights reserved.
+  https://www.cyberlink.com
+-->
+<resources>
+
+    <!-- 2D Anti-Spoofing -->
+    <string name="demo_fm_2das_result_liveness_noname">Hi, Guest</string>
+    <string name="demo_fm_2das_result_liveness_noname_subtitle">Liveness Score: %.2f</string>
+    <string name="demo_fm_2das_result_liveness_named">Hi, %s</string>
+    <string name="demo_fm_2das_result_liveness_named_subtitle">Visit: %1$d\nLiveness Score: %2$.2f</string>
+    <string name="demo_fm_2das_result_spoofing">Oops!\nPlease try again.</string>
+    <string name="demo_fm_2das_result_shaken">Hold the phone steady, don\'t move too fast, and then try again.</string>
+
+    <!-- eKYC Demo -->
+    <string name="demo_fm_ekyc_register">Register Account</string>
+    <string name="demo_fm_ekyc_verify">Verify for Transaction</string>
+    <string name="demo_fm_ekyc_title">KYC in 3 Steps</string>
+    <string name="demo_fm_ekyc_info_title">Enter Account Info</string>
+    <string name="demo_fm_ekyc_info_desc">Enter name, ID number and email then tap [Next] to continue</string>
+    <string name="demo_fm_ekyc_input_name">Name</string>
+    <string name="demo_fm_ekyc_input_id">ID or Passport Number</string>
+    <string name="demo_fm_ekyc_input_email">E-mail</string>
+    <string name="demo_fm_ekyc_next">Next</string>
+    <string name="demo_fm_ekyc_error">Error</string>
+    <string name="demo_fm_ekyc_error_desc">Please input your name for eKYC verification.</string>
+    <string name="demo_fm_ekyc_error_ok">OK</string>
+    <string name="demo_fm_ekyc_scan_id_card_title">Scan ID Card</string>
+    <string name="demo_fm_ekyc_scan_id_card_desc">Point your camera at the ID card and fit it in the frame below. Ensure the lighting is good, no glares or reflections appear on the ID, and then tap on the camera preview to continue.</string>
+    <string name="demo_fm_ekyc_tap_hint">Tap on the screen when the ID fits in the frame</string>
+    <string name="demo_fm_ekyc_tw_id">TW ID</string>
+    <string name="demo_fm_ekyc_general_id">Others</string>
+    <string name="demo_fm_ekyc_front_turn_title">Slowly turn the ID Card</string>
+    <string name="demo_fm_ekyc_front_turn_desc">Tap next and then slowly turn the ID Card to the specified direction</string>
+    <string name="demo_fm_ekyc_front_turn_left_hint">Slowly turn the ID to the left until it fits in the frame below</string>
+    <string name="demo_fm_ekyc_front_turn_right_hint">Slowly turn the ID to the right until it fits in the frame below</string>
+    <string name="demo_fm_ekyc_front_turn_up_hint">Slowly turn the ID upward until it fit in the frame below</string>
+    <string name="demo_fm_ekyc_back_turn_title">Back of the ID Card</string>
+    <string name="demo_fm_ekyc_back_turn_desc">Flip the ID card over for the following steps.</string>
+    <string name="demo_fm_ekyc_back_align_desc">Point your camera at the back of the ID card and fit it in the frame below. Ensure the lighting is good, no glares or reflections appear on the ID, and then tap on the camera preview to continue.</string>
+    <string name="demo_fm_ekyc_back_turn_left_hint">Slowly turn the ID to the left until the back of the ID fits in the frame below</string>
+    <string name="demo_fm_ekyc_back_turn_right_hint">Slowly turn the ID to the right until the back of the ID fits in the frame below</string>
+    <string name="demo_fm_ekyc_back_turn_up_hint">Slowly turn the ID upwards until the back of the ID fits in the frame below</string>
+    <string name="demo_fm_ekyc_as_title">Take a Selfie Video</string>
+    <string name="demo_fm_ekyc_as_desc">Next, we will turn on the front camera to take a selfie video of you. Tap [Start] when you’re ready.</string>
+    <string name="demo_fm_ekyc_as_start">Start</string>
+    <string name="demo_fm_ekyc_id_retry">Retry</string>
+    <string name="demo_fm_ekyc_id_failed_title">Failed to verify the ID Card is real</string>
+    <string name="demo_fm_ekyc_face_db_match">Face Enrollment</string>
+    <string name="demo_fm_ekyc_face_db_match1">Face &amp; DB Match</string>
+    <string name="demo_fm_ekyc_face_not_enroll">Face not Enroll</string>
+    <string name="demo_fm_ekyc_liveness">Liveness</string>
+    <string name="demo_fm_ekyc_face_id_match">Face &amp; ID Card Match</string>
+    <string name="demo_fm_ekyc_speaker_verification">Voice Enrollment</string>
+    <string name="demo_fm_ekyc_speaker_verification1">Speaker Verification</string>
+    <string name="demo_fm_ekyc_speaker_not_enroll">Speaker not Enroll</string>
+    <string name="demo_fm_ekyc_id_card_verification">ID Card Verification</string>
+    <string name="demo_fm_ekyc_passport_verification">E-passport Verification</string>
+    <string name="demo_fm_ekyc_voice_recognition">Voice Recognition</string>
+    <string name="demo_fm_ekyc_text_recognition">Text Recognition</string>
+    <string name="demo_fm_ekyc_complete">Complete</string>
+    <string name="demo_fm_ekyc_verify_pass">Verify Pass</string>
+    <string name="demo_fm_ekyc_verify_fail">Verify Fail</string>
+    <string name="demo_fm_ekyc_epassport_title">Scanning E-passport</string>
+    <string name="demo_fm_ekyc_epassport_desc">Point your camera at the E-passport and fit the photo and name page in the frame below. Ensure the lighting is good, no glares or reflections appear on the ID, and then tap on the camera preview to continue.</string>
+    <string name="demo_fm_ekyc_epassport_align_desc">Tap on the screen after the E-passport is fit in the frame</string>
+    <string name="demo_fm_ekyc_epassport_scan_desc">Now tap the chip of your E-passport to the sensor area of your device</string>
+    <string name="demo_fm_ekyc_epassport_scan_title">Reading via NFC</string>
+    <string name="demo_fm_ekyc_epassport_process">Reading…</string>
+    <string name="demo_fm_ekyc_epassport_passport_complete">Complete</string>
+    <string name="demo_fm_ekyc_epassport_read_failed">Failed</string>
+    <string name="demo_fm_ekyc_epassport_compare_failed">Wrong Information</string>
+    <string name="demo_fm_ekyc_confirm_information">Confirm Information</string>
+    <string name="demo_fm_ekyc_confirm_and_continue">Confirm and Continue</string>
+    <string name="demo_fm_ekyc_edit_information">Edit Information</string>
+    <string name="demo_fm_ekyc_confirm">Confirm</string>
+    <string name="demo_fm_ekyc_cancel">Cancel</string>
+    <string name="demo_fm_ekyc_edit">Edit</string>
+    <string name="demo_fm_ekyc_ocr_reflective_hint">The image is reflective</string>
+    <string name="demo_fm_ekyc_ocr_blurred_hint">The image is blurred</string>
+    <string name="demo_fm_ekyc_id_card_realness_score">Real ID Card AI Score:</string>
+
+    <!-- Health ID Card OCR Demo -->
+    <string name="demo_fm_health_id_card_ocr_title">Health ID Card OCR</string>
+    <string name="demo_fm_health_id_card_ocr_close">Close</string>
+    <string name="demo_fm_health_id_card_ocr_id_number">ID Number</string>
+    <string name="demo_fm_health_id_card_ocr_name">Name</string>
+    <string name="demo_fm_health_id_card_ocr_date_of_birth">Date of Birth</string>
+    <string name="demo_fm_health_id_card_ocr_card_number">Card Number</string>
+
+    <!-- eKYC e-Card -->
+    <string name="demo_fm_ekyc_ecard_title">KYC in 3 Steps</string>
+    <string name="demo_fm_ekyc_ecard_pin_title">Driver\'s License (Japan)</string>
+    <string name="demo_fm_ekyc_ecard_pin_desc">Enter the two PIN codes of your driver\'s license below and then tap [Continue]. If your driver\'s license is not protected by PIN codes, tap [Continue] directly with the fields empty.</string>
+    <string name="demo_fm_ekyc_ecard_scan_title">Reading via NFC</string>
+    <string name="demo_fm_ekyc_ecard_scan_desc">Put your driver\'s license on a desk, place your mobile phone on top of the driver\'s license firmly, and then tap [Continue].</string>
+    <string name="demo_fm_ekyc_ecard_read_result_title">NFC Reading Complete</string>
+    <string name="demo_fm_ekyc_ecard_pin1_input">PIN code 1</string>
+    <string name="demo_fm_ekyc_ecard_pin2_input">PIN code 2</string>
+    <string name="demo_fm_ekyc_ecard_start_button">Continue</string>
+    <string name="demo_fm_ekyc_ecard_tagwait">Tap the driver\'s license card.</string>
+    <string name="demo_fm_ekyc_ecard_pin_error">The PIN code is different</string>
+    <string name="demo_fm_ekyc_ecard_not_card_error">The card could not read correctly.</string>
+    <string name="demo_fm_ekyc_ecard_pin_lock">Your driver\'s license card is locked.</string>
+    <string name="demo_fm_ekyc_ecard_reading_message">Reading. Please do not remove your driver\'s license card.</string>
+    <string name="demo_fm_ekyc_ecard_hint_pass">4 digits</string>
+    <string name="demo_fm_ekyc_ecard_warning_message">If the PIN code is not set, leave it blank and start reading.</string>
+    <string name="demo_fm_ekyc_ecard_alert_message">Attention: Be sure to use correct the PIN code. The driver\'s license will be locked if you enter wrong PIN 3 times in a row.</string>
+    <string name="demo_fm_ekyc_ecard_pin1_pin2_input_warning_message">PIN codes 1 and 2 have not been entered.\nDo you want to continue reading?</string>
+    <string name="demo_fm_ekyc_ecard_pin1_input_warning_message">PIN code 1 has not been entered.\nDo you want to continue reading?</string>
+    <string name="demo_fm_ekyc_ecard_pin2_input_warning_message">PIN code 2 has not been entered.\nDo you want to continue reading?</string>
+    <string name="demo_fm_ekyc_ecard_4_characters_warning_message">The PIN code is 4 digits.</string>
+    <string name="demo_fm_ekyc_ecard_nfc_warning_message">There is no NFC.</string>
+    <string name="demo_fm_ekyc_ecard_nfc_enable_warning_message">Please turn on NFC capability.</string>
+    <string name="demo_fm_ekyc_ecard_yes">Yes</string>
+    <string name="demo_fm_ekyc_ecard_no">No</string>
+    <string name="demo_fm_ekyc_ecard_confirm">Confirm</string>
+    <string name="demo_fm_ekyc_ecard_reading">Reading</string>
+    <string name="demo_fm_ekyc_ecard_reading_do_not_move">Reading. Please do not let go of your driver\'s license.</string>
+    <string name="demo_fm_ekyc_ecard_reading_completed">Reading complete.</string>
+    <string name="demo_fm_ekyc_ecard_reading_failed">Reading unsuccessful.</string>
+    <string name="demo_fm_ekyc_ecard_need_pin">You need to enter your PIN codes</string>
+    <string name="demo_fm_ekyc_ecard_incorrect_pin_locked">The PIN code is locked</string>
+    <string name="demo_fm_ekyc_ecard_incorrect_pin_1">The PIN code is incorrect (Remaining number of tries:  1)</string>
+    <string name="demo_fm_ekyc_ecard_incorrect_pin_2">The PIN code is incorrect (Remaining number of tries: 2)</string>
+    <string name="demo_fm_ekyc_ecard_incorrect_pin_3">The PIN code is incorrect (Remaining number of tries: 3)</string>
+    <string name="demo_fm_ekyc_ecard_incorrect_pin_format">The PIN code format is incorrect.</string>
+    <string name="demo_fm_ekyc_ecard_pin_ignored">The PIN code entered was ignored because the driver\'s license does not have a PIN code.</string>
+    <string name="demo_fm_ekyc_ecard_as_title">Take a Selfie Video</string>
+    <string name="demo_fm_ekyc_ecard_as_desc">Next, we will turn on the front camera to take a selfie video of you. Tap [Start] when you\'re ready.</string>
+    <string name="demo_fm_ekyc_ecard_as_start">Start</string>
+    <string name="demo_fm_ekyc_ecard_verify_pass">Verify Pass</string>
+    <string name="demo_fm_ekyc_ecard_verify_fail">Verify Fail</string>
+    <string name="demo_fm_ekyc_ecard_next">Next</string>
+    <string name="demo_fm_ekyc_ecard_retry">Retry</string>
+    <string name="demo_fm_ekyc_ecard_card_verification">Driver\'s License Verification</string>
+    <string name="demo_fm_ekyc_ecard_face_driver_license_match">Face &amp; Driver\'s License Match</string>
+    <string name="demo_fm_ekyc_ecard_liveness">Liveness</string>
+    <string name="demo_fm_ekyc_ecard_voice_recognition">Voice Recognition</string>
+
+    <string name="demo_fm_ekyc_ecard_name">Name</string>
+    <string name="demo_fm_ekyc_ecard_date_of_birth">Date of Birth</string>
+    <string name="demo_fm_ekyc_ecard_address">Address</string>
+    <string name="demo_fm_ekyc_ecard_date_of_issue">Date of Issue</string>
+    <string name="demo_fm_ekyc_ecard_date_of_expiry">Date of Expiry</string>
+    <string name="demo_fm_ekyc_ecard_document_number">Document Number</string>
+    <string name="demo_fm_ekyc_ecard_face_image">Face Image</string>
+
+</resources>
