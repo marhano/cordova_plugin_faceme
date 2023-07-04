@@ -157,8 +157,12 @@ public class FaceMe extends CordovaPlugin {
   }
 
   private boolean startAntiSpoofing(CallbackContext callbackContext){
-    Intent intent = new Intent(cordova.getActivity(), AntiSpoofingActivity.class);
-    cordova.getActivity().startActivity(intent);
+    startAntiSpoofingCallbackContext = callbackContext;
+
+    cordova.getActivity().runOnUiThread(() -> {
+      Intent intent = new Intent(cordova.getActivity(), AntiSpoofingActivity.class);
+      cordova.startActivityForResult(this, intent, ANTI_SPOOFING_REQUEST_CODE);
+    });
 
     return true;
   }
