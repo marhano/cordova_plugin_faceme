@@ -17,7 +17,7 @@
      ```
 
 ## 4. Create the plugin project:
-   - Run the following command to create the plugin project, following the naming convention provided (use <> to avoid conflicts later on):
+   - Run the following command to create the plugin project, following the naming convention provided (inside the <> to avoid conflicts later on):
      ```
      plugman create --name <PluginName> --plugin_id <cordova-plugin-pluginname> --plugin_version <1.0.0>
      ```
