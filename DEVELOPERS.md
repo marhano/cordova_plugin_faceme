@@ -59,7 +59,7 @@
 ## 8. Create package.json file:
    - Generate a package.json file for your plugin project:
      ```
-     plugman createpackage.json .
+     plugman createpackagejson .
      ```
    - Leave the name field as default.
 
