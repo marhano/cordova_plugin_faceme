@@ -46,6 +46,7 @@
    - Open the plugin.xml file in VSCode.
    - Find the `<feature>` tag and modify the Android project with an appropriate package name (e.g., inc.bastion.pluginname.PluginName). Ensure that the separator is a dot (".") for it to work correctly.
    - Find the `<source-file>` change the target-dir to the package name swap the "." with "/" of the packange name e.g.,
+   - Find the `<js-module>` -> `<clobbers>` and change the target to your plugin name (e.g., PluginName).
 
       ```xml
       <source-file src="src/android/PluginName.java" target-dir="src/inc/bastion/pluginname/PluginName" />
