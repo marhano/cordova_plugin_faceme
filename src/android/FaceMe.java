@@ -52,7 +52,7 @@ import androidx.annotation.WorkerThread;
 public class FaceMe extends CordovaPlugin {
   private static final String TAG = "FaceMe";
 
-  private static final String LICENSE_KEY = "olJ5ziHGlU3FIHWZhhCAq27xJ70q4aMx1lVTK8TI";
+  private static String LICENSE_KEY = "";
   private boolean isLicenseActivated = false;
   private ExecutorService sdkThread;
 
@@ -83,8 +83,8 @@ public class FaceMe extends CordovaPlugin {
   private int maxFrameWidth = 720;
 
   public FaceMe(){
-      super();
-      Log.d(TAG, "Loading");
+    super();
+    Log.d(TAG, "Loading");
   }
 
   @Override
@@ -94,7 +94,8 @@ public class FaceMe extends CordovaPlugin {
     }else if(INITIALIZE_SDK.equals(action)){
       return initializeSDK(callbackContext);
     }else if(ACTIVATE_LICENSE.equals(action)){
-      cordova.getThreadPool().execute(() -> activateLicense(callbackContext));
+      String licenseKey = args.getString(0);
+      cordova.getThreadPool().execute(() -> activateLicense(licenseKey, callbackContext));
       return true;
     }else if(DEACTIVATE_LICENSE.equals(action)){
       cordova.getThreadPool().execute(() -> deactivateLicense(callbackContext));
@@ -178,8 +179,11 @@ public class FaceMe extends CordovaPlugin {
 
     if(result == 0){
       initSdkComponents();
+      callbackContext.success(result);
+    }else{
+      callbackContext.error(result);
     }
-    callbackContext.success(result);
+
     return true;
   }
 
@@ -359,12 +363,13 @@ public class FaceMe extends CordovaPlugin {
     FaceMeSdk.initialize(context, LICENSE_KEY);
     int isDeactivated = licenseUtils.deactivateLicense();
     if(isDeactivated == 0){
-        isLicenseActivated = false;
+      isLicenseActivated = false;
     }
     callbackContext.success(isDeactivated);
   }
 
-  private void activateLicense(CallbackContext callbackContext){
+  private void activateLicense(String licenseKey, CallbackContext callbackContext){
+    LICENSE_KEY = licenseKey;
     Context context = this.cordova.getActivity().getApplicationContext();
     LicenseUtils licenseUtils = new LicenseUtils();
     FaceMeSdk.initialize(context, LICENSE_KEY);

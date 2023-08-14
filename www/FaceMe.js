@@ -24,8 +24,8 @@ FaceMe.getBitmapImage = function(pixelData, onSuccess, onError){
     exec(onSuccess, onError, PLUGIN_NAME, "getBitmapImage", [pixelData]);
 };
 
-FaceMe.activateLicense = function(onSuccess, onError){
-    exec(onSuccess, onError, PLUGIN_NAME, "activateLicense", []);
+FaceMe.activateLicense = function(licenseKey, onSuccess, onError){
+    exec(onSuccess, onError, PLUGIN_NAME, "activateLicense", [licenseKey]);
 };
 
 FaceMe.deactivateLicense = function(onSuccess, onError){
