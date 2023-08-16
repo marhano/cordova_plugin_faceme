@@ -5,13 +5,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
 import com.cyberlink.faceme.DetectionMode;
 import com.cyberlink.faceme.DetectionModelSpeedLevel;
@@ -58,6 +63,14 @@ public class AntiSpoofingActivity extends AppCompatActivity implements AntiSpoof
   private ExecutorService sdkThread;
   private int frameWidth = 720;
   private int frameHeight = 1280;
+  protected final Handler mainHandler = new Handler(Looper.getMainLooper());
+
+  private View viewCenterAnchor;
+  private View resultLayoutView;
+  private TextView txtResultTitle;
+  private TextView txtResultSubtitle;
+
+  private static final long RESULT_FROZEN_PERIOD = 3000L;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +83,7 @@ public class AntiSpoofingActivity extends AppCompatActivity implements AntiSpoof
     initSdkComponents();
     initDetectSetting();
     initLayoutSetting();
+    initResultUi();
 
     if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
       // TODO: Consider calling
@@ -246,7 +260,7 @@ public class AntiSpoofingActivity extends AppCompatActivity implements AntiSpoof
     layoutSetting.actionDetailHintFontSize = 16;
     layoutSetting.actionDetailHintFont = exoRegular;
 
-    layoutSetting.showFPS = true;
+    layoutSetting.showFPS = false;
 
     layoutSetting.progressBarForegroundColor = Color.rgb(58, 141, 222);
     layoutSetting.progressBarBackgroundColor = Color.argb(0x55, 255, 80, 25);
@@ -278,6 +292,24 @@ public class AntiSpoofingActivity extends AppCompatActivity implements AntiSpoof
     asFragment.setLayoutSetting(layoutSetting);
   }
 
+  private void initResultUi(){
+    viewCenterAnchor = findViewById(R.id.viewCenterAnchor);
+    resultLayoutView = findViewById(R.id.resultLayoutView);
+    txtResultTitle = findViewById(R.id.txtResultTitle);
+    txtResultSubtitle = findViewById(R.id.txtResultSubtitle);
+  }
+
+  private final Runnable finishResultPage = this::restartDetection;
+
+  @SuppressLint("MissingPermission")
+  private void restartDetection(){
+    mainHandler.removeCallbacks(finishResultPage);
+    resultLayoutView.setVisibility(View.GONE);
+    if(asFragment != null){
+      asFragment.startDetection();
+    }
+  }
+
   @Override
   public void onPreviewSizeChanged(int i, int i1, float v, float v1) {
 
@@ -289,8 +321,11 @@ public class AntiSpoofingActivity extends AppCompatActivity implements AntiSpoof
   }
 
   @Override
-  public void onAntiSpoofingResult(Bitmap bitmap, FaceInfo face, int i, double v, int i1, SpeechFeature speechFeature) {
-    boolean hasSimilarFace = false;
+  public void onAntiSpoofingResult(Bitmap bitmap, FaceInfo face, int result, double v, int i1, SpeechFeature speechFeature) {
+    txtResultTitle.setText("");
+    resultLayoutView.setVisibility(View.VISIBLE);
+    txtResultSubtitle.setVisibility(View.GONE);
+    Intent resultIntent = new Intent();
     int facesCount = _recognizer.extractFace(_extractConfig, Collections.singletonList(bitmap));
     if (facesCount > 0) {
       ArrayList<FaceHolder> faces = new ArrayList<>();
@@ -299,15 +334,25 @@ public class AntiSpoofingActivity extends AppCompatActivity implements AntiSpoof
 
         List<SimilarFaceResult> searchResult = _dataManager.searchSimilarFace(confidenceThreshold, -1, faceFeature, 1);
         if (searchResult != null && !searchResult.isEmpty()) {
-          hasSimilarFace = true;
+          if(result == AntiSpoofingCallbackV2.UI_RESULT_SHAKEN){
+            txtResultTitle.setText(R.string.demo_fm_2das_result_shaken);
+          }else if(result == AntiSpoofingCallbackV2.UI_RESULT_SPOOFING){
+            txtResultTitle.setText(R.string.demo_fm_2das_result_spoofing);
+          }else{
+            resultIntent.putExtra("hasSimilarFace", true);
+            setResult(RESULT_OK, resultIntent);
+            finish();
+          }
         }else{
-          hasSimilarFace = false;
+          resultIntent.putExtra("hasSimilarFace", false);
+          setResult(RESULT_OK, resultIntent);
+          finish();
         }
       }
-      Intent resultIntent = new Intent();
-      resultIntent.putExtra("hasSimilarFace", hasSimilarFace);
-      setResult(RESULT_OK, resultIntent);
-      finish();
+      mainHandler.removeCallbacks(finishResultPage);
+      mainHandler.postDelayed(finishResultPage, RESULT_FROZEN_PERIOD);
+
+      asFragment.enableTestDump(false);
     }
   }
 }
