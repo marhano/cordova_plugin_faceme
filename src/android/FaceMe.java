@@ -46,10 +46,16 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.util.Size;
 import android.graphics.BitmapFactory;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.widget.FrameLayout;
 
 import androidx.annotation.WorkerThread;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
-public class FaceMe extends CordovaPlugin {
+public class FaceMe extends CordovaPlugin implements AntiSpoofActivity.AntiSpoofingListener {
   private static final String TAG = "FaceMe";
 
   private static String LICENSE_KEY = "";
@@ -81,6 +87,11 @@ public class FaceMe extends CordovaPlugin {
 
   private int maxFrameHeight = 1280;
   private int maxFrameWidth = 720;
+
+  private ViewParent webViewParent;
+  private AntiSpoofActivity asFragment;
+  private int containerViewId = 20;
+  private boolean toBack = true;
 
   public FaceMe(){
     super();
@@ -159,10 +170,64 @@ public class FaceMe extends CordovaPlugin {
 
   private boolean startAntiSpoofing(CallbackContext callbackContext){
     startAntiSpoofingCallbackContext = callbackContext;
+    final float opacity = Float.parseFloat("1");
+    asFragment = new AntiSpoofActivity();
+    asFragment.setEventListener(this);
+    cordova.getActivity().runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        //create or update the layout params for the container view
+        FrameLayout containerView = (FrameLayout)cordova.getActivity().findViewById(containerViewId);
+        if(containerView == null){
+          containerView = new FrameLayout(cordova.getActivity().getApplicationContext());
+          containerView.setId(containerViewId);
 
-    cordova.getActivity().runOnUiThread(() -> {
-      Intent intent = new Intent(cordova.getActivity(), AntiSpoofingActivity.class);
-      cordova.startActivityForResult(this, intent, ANTI_SPOOFING_REQUEST_CODE);
+          FrameLayout.LayoutParams containerLayoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+          cordova.getActivity().addContentView(containerView, containerLayoutParams);
+        }
+
+        //display camera below the webview
+        if(toBack){
+          View view = webView.getView();
+          ViewParent rootParent = containerView.getParent();
+          ViewParent curParent = view.getParent();
+
+          view.setBackgroundColor(0x00000000);
+
+          // If parents do not match look for.
+          if(curParent.getParent() != rootParent) {
+            while(curParent != null && curParent.getParent() != rootParent) {
+              curParent = curParent.getParent();
+            }
+
+            if(curParent != null) {
+              ((ViewGroup)curParent).setBackgroundColor(0x00000000);
+              ((ViewGroup)curParent).bringToFront();
+            } else {
+              // Do default...
+              curParent = view.getParent();
+              webViewParent = curParent;
+              ((ViewGroup)view).bringToFront();
+            }
+          }else{
+            // Default
+            webViewParent = curParent;
+            ((ViewGroup)curParent).bringToFront();
+          }
+
+        }else{
+          //set view back to front
+          containerView.setAlpha(opacity);
+          containerView.bringToFront();
+        }
+
+
+        FragmentManager fragmentManager = cordova.getActivity().getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.add(containerView.getId(), asFragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+      }
     });
 
     return true;
@@ -595,4 +660,8 @@ public class FaceMe extends CordovaPlugin {
     return Base64.encodeToString(imageBytes, Base64.DEFAULT);
   }
 
+  @Override
+  public void onScanResult(int result) {
+    startAntiSpoofingCallbackContext.success(result);
+  }
 }

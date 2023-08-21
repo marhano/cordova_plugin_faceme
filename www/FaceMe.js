@@ -8,8 +8,8 @@ FaceMe.testPlugin = function(onSuccess, onError){
     exec(onSuccess, onError, PLUGIN_NAME, "testPlugin", []);
 };
 
-FaceMe.initializeSDK = function(onSuccess, onError){
-    exec(onSuccess, onError, PLUGIN_NAME, "initializeSDK", []);
+FaceMe.initializeSDK = function(licenseKey, onSuccess, onError){
+    exec(onSuccess, onError, PLUGIN_NAME, "initializeSDK", [licenseKey]);
 };
 
 FaceMe.getBase64Image = function(base64Image, onSuccess, onError){

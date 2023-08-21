@@ -1,4 +1,5 @@
 dependencies{
     implementation files('src/main/libs/faceme-6.14.0.aar') 
     implementation files('src/main/libs/faceme_widgets-6.14.0.aar')
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 }

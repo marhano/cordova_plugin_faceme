@@ -9,8 +9,10 @@ xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.a
         <resource-file src="src/android/libs/faceme-6.14.0.aar" target="libs/faceme-6.14.0.aar"/>
         <resource-file src="src/android/libs/faceme_widgets-6.14.0.aar" target="libs/faceme_widgets-6.14.0.aar"/>
         <resource-file src="src/android/activity_anti_spoofing.xml" target="res/layout/activity_anti_spoofing.xml" />
+        <resource-file src="src/android/anti_spoofing_activity.xml" target="res/layout/anti_spoofing_activity.xml" />
         <resource-file src="src/android/widget_strings.xml" target="res/values/widget_strings.xml" />
         <resource-file src="src/android/demo_strings.xml" target="res/values/demo_strings.xml" />
+        <resource-file src="src/android/antispoofing_theme.xml" target="res/values/antispoofing_theme.xml" />
         <framework src="src/android/faceme.gradle" custom="true" type="gradleReference" />
         <config-file parent="/*" target="res/xml/config.xml">
             <feature name="FaceMe">
@@ -26,6 +28,7 @@ xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.a
                     android:name="android.app.lib_name"
                     android:value="" />
             </activity>
+            <activity android:name="inc.bastion.faceme.AntiSpoofActivity" android:screenOrientation="portrait" android:theme="@style/AntiSpoofingTheme" />
         </config-file>
         <source-file src="src/android/FaceMe.java" target-dir="src/inc/bastion/faceme" />
         <source-file src="src/android/FaceHolder.java" target-dir="src/inc/bastion/faceme" />
@@ -33,5 +36,6 @@ xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.a
         <source-file src="src/android/RectUtil.java" target-dir="src/inc/bastion/faceme" />
         <source-file src="src/android/LicenseUtils.java" target-dir="src/inc/bastion/faceme" />
         <source-file src="src/android/AntiSpoofingActivity.java" target-dir="src/inc/bastion/faceme" />
+        <source-file src="src/android/AntiSpoofActivity.java" target-dir="src/inc/bastion/faceme" />
     </platform>
 </plugin>
