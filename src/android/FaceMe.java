@@ -103,7 +103,8 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofActivity.AntiSpoof
     if(TEST_PLUGIN.equals(action)){
       return testPlugin(callbackContext);
     }else if(INITIALIZE_SDK.equals(action)){
-      return initializeSDK(callbackContext);
+      String licenseKey = args.getString(0);
+      return initializeSDK(licenseKey, callbackContext);
     }else if(ACTIVATE_LICENSE.equals(action)){
       String licenseKey = args.getString(0);
       cordova.getThreadPool().execute(() -> activateLicense(licenseKey, callbackContext));
@@ -233,8 +234,9 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofActivity.AntiSpoof
     return true;
   }
 
-  private boolean initializeSDK(CallbackContext callbackContext){
+  private boolean initializeSDK(String licenseKey, CallbackContext callbackContext){
     Context context = this.cordova.getActivity().getApplicationContext();
+    LICENSE_KEY = licenseKey;
     FaceMeSdk.initialize(context, LICENSE_KEY);
 
     LicenseManager licenseManager = new LicenseManager();
