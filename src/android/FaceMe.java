@@ -55,7 +55,7 @@ import androidx.annotation.WorkerThread;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-public class FaceMe extends CordovaPlugin implements AntiSpoofActivity.AntiSpoofingListener {
+public class FaceMe extends CordovaPlugin implements AntiSpoofingActivity.AntiSpoofingListener {
   private static final String TAG = "FaceMe";
 
   private static String LICENSE_KEY = "";
@@ -89,7 +89,7 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofActivity.AntiSpoof
   private int maxFrameWidth = 720;
 
   private ViewParent webViewParent;
-  private AntiSpoofActivity asFragment;
+  private AntiSpoofingActivity asFragment;
   private int containerViewId = 20;
   private boolean toBack = true;
 
@@ -144,27 +144,8 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofActivity.AntiSpoof
     return false;
   }
 
-  @Override
-  public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    super.onActivityResult(requestCode, resultCode, data);
-
-    if (requestCode == ANTI_SPOOFING_REQUEST_CODE) {
-      if (resultCode == Activity.RESULT_OK) {
-        boolean hasSimilarFace = data.getBooleanExtra("hasSimilarFace", false);
-        startAntiSpoofingCallbackContext.success(hasSimilarFace ? 1 : 0); // Return 1 for true, 0 for false
-      } else {
-        startAntiSpoofingCallbackContext.error("Anti-spoofing activity result canceled or failed");
-      }
-    }
-  }
-
   private boolean testPlugin(CallbackContext callbackContext){
     startAntiSpoofingCallbackContext = callbackContext;
-
-    cordova.getActivity().runOnUiThread(() -> {
-      Intent intent = new Intent(cordova.getActivity(), AntiSpoofingActivity.class);
-      cordova.startActivityForResult(this, intent, ANTI_SPOOFING_REQUEST_CODE);
-    });
 
     return true;
   }
