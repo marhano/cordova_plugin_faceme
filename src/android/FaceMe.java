@@ -153,7 +153,7 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofingActivity.AntiSp
   private boolean startAntiSpoofing(CallbackContext callbackContext){
     startAntiSpoofingCallbackContext = callbackContext;
     final float opacity = Float.parseFloat("1");
-    asFragment = new AntiSpoofActivity();
+    asFragment = new AntiSpoofingActivity();
     asFragment.setEventListener(this);
     cordova.getActivity().runOnUiThread(new Runnable() {
       @Override
