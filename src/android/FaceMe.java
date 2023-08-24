@@ -77,7 +77,6 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofingActivity.AntiSp
   private static final String START_ANTI_SPOOFING = "startAntiSpoofing";
 
   private CallbackContext startAntiSpoofingCallbackContext;
-  private static final int ANTI_SPOOFING_REQUEST_CODE = 123;
 
   private FaceHolder _tempHolder;
   private FaceHolder _faceHolder;

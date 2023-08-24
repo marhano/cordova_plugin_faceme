@@ -92,7 +92,7 @@ public void setEventListener(AntiSpoofingListener listener){
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
     appResourcePackage = getActivity().getPackageName();
 
-    view = inflater.inflate(getResources().getIdentifier("anti_spoofing_activity", "layout", appResourcePackage), container, false);
+    view = inflater.inflate(getResources().getIdentifier("activity_anti_spoofing", "layout", appResourcePackage), container, false);
 
     initSdkComponents();
     int asFragmentId = getActivity().getResources().getIdentifier("fm_antispoofing_fragment", "id", appResourcePackage);
