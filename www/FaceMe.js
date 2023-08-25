@@ -76,12 +76,12 @@ FaceMe.startAntiSpoofing = function(options, onSuccess, onError){
     const BLACK_COLOR = "#000000"
     const BORDER_FONT = 3.3;
 
-    options.showFPS = options.showFPS || true;
+    options.showFPS = options.showFPS || false;
 
     options.frameActiveColor = options.frameActiveColor || ACTIVE_COLOR;
     options.frameIdleColor = options.frameIdleColor || IDLE_COLOR;
     options.frameBorderWidth = options.frameBorderWidth || BORDER_FONT;
-    options.showFrame = options.showFrame || true;
+    options.showFrame = options.showFrame || false;
 
     //Circle
     options.circleActiveColor = options.circleActiveColor || ACTIVE_COLOR;
@@ -112,25 +112,25 @@ FaceMe.startAntiSpoofing = function(options, onSuccess, onError){
     options.footerSubtitleColor = options.footerSubtitleColor || BLACK_COLOR;
     options.footerSubtitleFont = options.footerSubtitleFont || null;
     options.footerSubtitleFontSize = options.footerSubtitleFontSize || -1;
-    options.showFooter = options.showFooter || true;
+    options.showFooter = options.showFooter || false;
 
     //User Action Hint
     options.userActionHintColor = options.userActionHintColor || BLACK_COLOR;
     options.userActionHintFont = options.userActionHintFont || null;
     options.userActionHintFontSize = options.userActionHintFontSize || -1;
-    options.showUserActionSteps = options.showUserActionSteps || true;
+    options.showUserActionSteps = options.showUserActionSteps || false;
 
     //Speech Number
     options.speechNumberActiveColor = options.speechNumberActiveColor || "#1E90FF"; 
     options.speechNumberIdleColor = options.speechNumberIdleColor || "#888888"; 
-    options.speechNumberFont = options.speechNumberFont || null; 
+    options.speechNumberFont = options.speechNumberFont || false; 
     options.speechNumberFontSize = options.speechNumberFontSize || -1; 
 
     //Speech Language
     options.speechLanguageColor = options.speechLanguageColor || BLACK_COLOR; 
     options.speechLanguageFont = options.speechLanguageFont || null; 
     options.speechLanguageBackgroundColor = options.speechLanguageBackgroundColor || "#DBEEFE"; //nr
-    options.showSpeechLanguage = options.showSpeechLanguage || true; 
+    options.showSpeechLanguage = options.showSpeechLanguage || false; 
 
     //Alert Position
     options.alertDistanceToCircle = options.alertDistanceToCircle || -1;
