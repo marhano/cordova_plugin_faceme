@@ -1,7 +1,9 @@
 package inc.bastion.faceme;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -20,6 +22,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.cyberlink.faceme.DetectionMode;
 import com.cyberlink.faceme.DetectionModelSpeedLevel;
@@ -34,6 +38,7 @@ import com.cyberlink.faceme.FaceMeDataManager;
 import com.cyberlink.faceme.FaceMeRecognizer;
 import com.cyberlink.faceme.FaceMeSdk;
 import com.cyberlink.faceme.LicenseManager;
+import com.cyberlink.faceme.LicenseOption;
 import com.cyberlink.faceme.RecognizerConfig;
 import com.cyberlink.faceme.RecognizerMode;
 import com.cyberlink.faceme.SimilarFaceResult;
@@ -54,6 +59,8 @@ public class AntiSpoofingActivity extends Fragment implements AntiSpoofingCallba
     void onScanResult(int result);
     void onAntiSpoofingActivityDestroyed();
   }
+
+
 
   private AntiSpoofingListener eventListener;
 
@@ -270,13 +277,29 @@ public void setEventListener(AntiSpoofingListener listener){
     Typeface exoBold = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/font/Exo 2/Exo2-Bold.ttf");
     Typeface exoRegular = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/font/Exo 2/Exo2-Regular.ttf");
 
-    Typeface tfActionHintFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.actionHintFont);
-    Typeface tfActionDetailHintFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.actionDetailHintFont);
-    Typeface tfAlertDescriptionFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.alertDescriptionFont);
-    Typeface tfAlertTitleFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.alertTitleFont);
-    Typeface tfFooterTitleFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.footerTitleFont);
-    Typeface tfFooterSubtitleFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.footerSubtitleFont);
-    Typeface tfUserActionHintFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.userActionHintFont);
+    Typeface tfActionHintFont = null;
+    Typeface tfActionDetailHintFont = null;
+    Typeface tfAlertDescriptionFont = null;
+    Typeface tfAlertTitleFont = null;
+    Typeface tfFooterTitleFont = null;
+    Typeface tfFooterSubtitleFont = null;
+    Typeface tfUserActionHintFont = null;
+
+    if(asConfig.actionHintFont != "null"){
+      tfActionHintFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.actionHintFont);
+    }else if(asConfig.actionDetailHintFont != "null"){
+      tfActionDetailHintFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.actionDetailHintFont);
+    }else if(asConfig.alertDescriptionFont != "null"){
+      tfAlertDescriptionFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.alertDescriptionFont);
+    }else if(asConfig.alertTitleFont != "null"){
+      tfAlertTitleFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.alertTitleFont);
+    }else if(asConfig.footerTitleFont != "null"){
+      tfFooterTitleFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.footerTitleFont);
+    }else if(asConfig.footerSubtitleFont != "null"){
+      tfFooterSubtitleFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.footerSubtitleFont);
+    }else if(asConfig.userActionHintFont != "null"){
+      tfUserActionHintFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.userActionHintFont);
+    }
 
     int IDLE_COLOR = Color.WHITE;
     int ACTIVE_COLOR = Color.rgb(255, 80, 25);
