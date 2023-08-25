@@ -86,7 +86,7 @@ public class AntiSpoofingActivity extends Fragment implements AntiSpoofingCallba
   private TextView txtResultTitle;
   private TextView txtResultSubtitle;
 
-  public AntiSpoofiingConfig asConfig;
+  public AntiSpoofingConfig asConfig;
 
   private static final long RESULT_FROZEN_PERIOD = 3000L;
 

@@ -1,6 +1,6 @@
 package inc.bastion.faceme;
 
-public class AntiSpoofiingConfig {
+public class AntiSpoofingConfig {
   //GLOBAL VARIABLES
   public boolean showFPS;
 
@@ -75,7 +75,7 @@ public class AntiSpoofiingConfig {
   public String alertDescriptionFont;
   public float alertDescriptionFontSize;
 
-  public AntiSpoofiingConfig(boolean showFPS,
+  public AntiSpoofingConfig(boolean showFPS,
                                int frameActiveColor, int frameIdleColor,
                                boolean showFrame, float frameBorderWidth,
                                int circleActiveColor, int circleIdleColor,

@@ -139,7 +139,7 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofingActivity.AntiSp
       String username = args.getString(0);
       return addFace(username, callbackContext);
     }else if(START_ANTI_SPOOFING.equals(action)){
-      AntiSpoofiingConfig asConfig = new AntiSpoofiingConfig(
+      AntiSpoofingConfig asConfig = new AntiSpoofiingConfig(
         args.getBoolean(0),
 
         Color.parseColor(args.getString(1)),
