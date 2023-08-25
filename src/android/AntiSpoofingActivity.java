@@ -90,9 +90,9 @@ public class AntiSpoofingActivity extends Fragment implements AntiSpoofingCallba
 
   private static final long RESULT_FROZEN_PERIOD = 3000L;
 
-public void setEventListener(AntiSpoofingListener listener){
-  eventListener = listener;
-}
+  public void setEventListener(AntiSpoofingListener listener){
+    eventListener = listener;
+  }
 
   @Nullable
   @Override
@@ -287,17 +287,23 @@ public void setEventListener(AntiSpoofingListener listener){
 
     if(asConfig.actionHintFont != "null"){
       tfActionHintFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.actionHintFont);
-    }else if(asConfig.actionDetailHintFont != "null"){
+    }
+    if(asConfig.actionDetailHintFont != "null"){
       tfActionDetailHintFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.actionDetailHintFont);
-    }else if(asConfig.alertDescriptionFont != "null"){
+    }
+    if(asConfig.alertDescriptionFont != "null"){
       tfAlertDescriptionFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.alertDescriptionFont);
-    }else if(asConfig.alertTitleFont != "null"){
+    }
+    if(asConfig.alertTitleFont != "null"){
       tfAlertTitleFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.alertTitleFont);
-    }else if(asConfig.footerTitleFont != "null"){
+    }
+    if(asConfig.footerTitleFont != "null"){
       tfFooterTitleFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.footerTitleFont);
-    }else if(asConfig.footerSubtitleFont != "null"){
+    }
+    if(asConfig.footerSubtitleFont != "null"){
       tfFooterSubtitleFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.footerSubtitleFont);
-    }else if(asConfig.userActionHintFont != "null"){
+    }
+    if(asConfig.userActionHintFont != "null"){
       tfUserActionHintFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.userActionHintFont);
     }
 
