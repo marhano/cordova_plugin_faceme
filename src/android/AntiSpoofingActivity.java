@@ -22,6 +22,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.cyberlink.faceme.DetectionMode;
 import com.cyberlink.faceme.DetectionModelSpeedLevel;
@@ -55,7 +57,10 @@ import java.util.concurrent.Executors;
 public class AntiSpoofingActivity extends Fragment implements AntiSpoofingCallbackV2{
   public interface AntiSpoofingListener{
     void onScanResult(int result);
+    void onAntiSpoofingActivityDestroyed();
   }
+
+
 
   private AntiSpoofingListener eventListener;
 
@@ -80,6 +85,8 @@ public class AntiSpoofingActivity extends Fragment implements AntiSpoofingCallba
   private View resultLayoutView;
   private TextView txtResultTitle;
   private TextView txtResultSubtitle;
+
+  public AntiSpoofiingConfig asConfig;
 
   private static final long RESULT_FROZEN_PERIOD = 3000L;
 
@@ -120,6 +127,16 @@ public void setEventListener(AntiSpoofingListener listener){
   @Override
   public void onResume() {
     super.onResume();
+  }
+
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+
+    if(asFragment != null){
+      getChildFragmentManager().beginTransaction().remove(asFragment);
+      asFragment = null;
+    }
   }
 
 
@@ -259,57 +276,68 @@ public void setEventListener(AntiSpoofingListener listener){
 
     Typeface exoBold = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/font/Exo 2/Exo2-Bold.ttf");
     Typeface exoRegular = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/font/Exo 2/Exo2-Regular.ttf");
+
+    Typeface tfActionHintFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.actionHintFont);
+    Typeface tfActionDetailHintFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.actionDetailHintFont);
+    Typeface tfAlertDescriptionFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.alertDescriptionFont);
+    Typeface tfAlertTitleFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.alertTitleFont);
+    Typeface tfFooterTitleFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.footerTitleFont);
+    Typeface tfFooterSubtitleFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.footerSubtitleFont);
+    Typeface tfUserActionHintFont = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/" + asConfig.userActionHintFont);
+
     int IDLE_COLOR = Color.WHITE;
     int ACTIVE_COLOR = Color.rgb(255, 80, 25);
     float BORDER_FONT = 5.3f;
 
-    if(exoRegular != null){
-      layoutSetting.actionHintFont = exoRegular;
-      layoutSetting.actionDetailHintFont = exoRegular;
-      layoutSetting.alertTitleFont = exoBold; // Default
-      layoutSetting.alertDescriptionFont = exoRegular; // Default
-    }
+    layoutSetting.showFPS = asConfig.showFPS;
 
-    layoutSetting.frameIdleColor = IDLE_COLOR;
-    layoutSetting.frameActiveColor = ACTIVE_COLOR;
-    layoutSetting.frameBorderWidth = BORDER_FONT;
-    layoutSetting.showFrame = true;
-    layoutSetting.circleIdleColor = IDLE_COLOR;
-    layoutSetting.circleActiveColor = ACTIVE_COLOR;
-    layoutSetting.circleBorderWidth = BORDER_FONT;
+    layoutSetting.frameIdleColor = asConfig.frameIdleColor;
+    layoutSetting.frameActiveColor = asConfig.frameActiveColor;
+    layoutSetting.frameBorderWidth = asConfig.frameBorderWidth;
+    layoutSetting.showFrame = asConfig.showFrame;
 
-    layoutSetting.actionHintColor = IDLE_COLOR;
-    layoutSetting.actionHintFontSize = 20;
-    layoutSetting.actionDetailHintIdleColor = IDLE_COLOR;
-    layoutSetting.actionDetailHintFontSize = 16;
+    layoutSetting.circleIdleColor = asConfig.circleIdleColor;
+    layoutSetting.circleActiveColor = asConfig.circleActiveColor;
+    layoutSetting.circleBorderWidth = asConfig.circleBorderWidth;
 
+    layoutSetting.actionDetailHintActiveColor = asConfig.actionDetailHintActiveColor;
+    layoutSetting.actionDetailHintIdleColor = asConfig.actionDetailHintIdleColor;
+    layoutSetting.actionDetailHintFont = tfActionDetailHintFont;
+    layoutSetting.actionDetailHintFontSize = asConfig.actionDetailHintFontSize;
 
-    layoutSetting.showFPS = false;
+    layoutSetting.actionHintColor = asConfig.actionHintColor;
+    layoutSetting.actionHintFont = tfActionHintFont;
+    layoutSetting.actionHintFontSize = asConfig.actionHintFontSize;
 
-    layoutSetting.progressBarForegroundColor = Color.rgb(58, 141, 222);
-    layoutSetting.progressBarBackgroundColor = Color.argb(0x55, 255, 80, 25);
-    layoutSetting.progressBarWidth = 500;
-    layoutSetting.progressBarHeight = 5;
+    layoutSetting.progressBarForegroundColor = asConfig.progressBarForegroundColor;
+    layoutSetting.progressBarBackgroundColor = asConfig.progressBarBackgroundColor;
+    layoutSetting.progressBarWidth = asConfig.progressBarWidth;
+    layoutSetting.progressBarHeight = asConfig.progressBarHeight;
 
-    layoutSetting.userActionHintColor = Color.BLACK;
-    layoutSetting.userActionHintFontSize = -1; // Default
-    layoutSetting.userActionHintFont = null; // Default
-    layoutSetting.showUserActionSteps = true;
+    layoutSetting.footerTitleColor = asConfig.footerTitleColor;
+    layoutSetting.footerTitleFontSize = asConfig.footerTitleFontSize;
+    layoutSetting.footerTitleFont = tfFooterTitleFont;
+    layoutSetting.footerSubtitleColor = asConfig.footerSubtitleColor;
+    layoutSetting.footerSubtitleFontSize = asConfig.footerSubtitleFontSize;
+    layoutSetting.footerSubtitleFont = tfFooterSubtitleFont;
+    layoutSetting.showFooter = asConfig.showFooter;
 
-    layoutSetting.footerTitleColor = Color.BLACK;
-    layoutSetting.footerTitleFontSize = -1; // Default
-    layoutSetting.footerTitleFont = null; // Default
-    layoutSetting.footerSubtitleColor = Color.BLACK;
-    layoutSetting.footerSubtitleFontSize = -1; // Default
-    layoutSetting.footerSubtitleFont = null; // Default
-    layoutSetting.showFooter = false;
+    layoutSetting.userActionHintColor = asConfig.userActionHintColor;
+    layoutSetting.userActionHintFontSize = asConfig.userActionHintFontSize;
+    layoutSetting.userActionHintFont = tfUserActionHintFont;
+    layoutSetting.showUserActionSteps = asConfig.showUserActionSteps;
 
-    layoutSetting.alertBackgroundColor = Color.argb(90, 255, 80, 25);
-    layoutSetting.alertTitleColor = Color.WHITE;
-    layoutSetting.alertTitleFontSize = 20; // Default
-    layoutSetting.alertDescriptionColor = Color.WHITE;
-    layoutSetting.alertDescriptionFontSize = 16; // Default
-    layoutSetting.alertDistanceToCircle = -1; // Default
+    layoutSetting.alertDistanceToCircle = asConfig.alertDistanceToCircle;
+
+    layoutSetting.alertBackgroundColor = asConfig.alertBackgroundColor;
+
+    layoutSetting.alertTitleColor = asConfig.alertTitleColor;
+    layoutSetting.alertTitleFont = tfAlertTitleFont;
+    layoutSetting.alertTitleFontSize = asConfig.alertTitleFontSize;
+
+    layoutSetting.alertDescriptionColor = asConfig.alertDescriptionColor;
+    layoutSetting.alertDescriptionFont = tfAlertDescriptionFont;
+    layoutSetting.alertDescriptionFontSize = asConfig.alertDescriptionFontSize;
 
     asFragment.setLayoutSetting(layoutSetting);
   }
@@ -365,13 +393,15 @@ public void setEventListener(AntiSpoofingListener listener){
             txtResultTitle.setText(getString(getActivity().getResources().getIdentifier("demo_fm_2das_result_spoofing", "string", appResourcePackage)));
           }else{
             eventListener.onScanResult(1);
+            eventListener.onAntiSpoofingActivityDestroyed();
           }
         }else{
           eventListener.onScanResult(0);
+          mainHandler.removeCallbacks(finishResultPage);
+          mainHandler.postDelayed(finishResultPage, RESULT_FROZEN_PERIOD);
         }
       }
-      mainHandler.removeCallbacks(finishResultPage);
-      mainHandler.postDelayed(finishResultPage, RESULT_FROZEN_PERIOD);
+
 
       asFragment.enableTestDump(false);
     }

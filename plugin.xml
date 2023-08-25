@@ -27,5 +27,6 @@ xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.a
         <source-file src="src/android/RectUtil.java" target-dir="src/inc/bastion/faceme" />
         <source-file src="src/android/LicenseUtils.java" target-dir="src/inc/bastion/faceme" />
         <source-file src="src/android/AntiSpoofingActivity.java" target-dir="src/inc/bastion/faceme" />
+        <source-file src="src/android/AntiSpoofingConfig.java" target-dir="src/inc/bastion/faceme" />
     </platform>
 </plugin>

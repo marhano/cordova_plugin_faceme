@@ -38,6 +38,7 @@ import com.cyberlink.faceme.SimilarFaceResult;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.util.Base64;
 import android.content.Context;
@@ -138,7 +139,69 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofingActivity.AntiSp
       String username = args.getString(0);
       return addFace(username, callbackContext);
     }else if(START_ANTI_SPOOFING.equals(action)){
-      return startAntiSpoofing(callbackContext);
+      AntiSpoofiingConfig asConfig = new AntiSpoofiingConfig(
+        args.getBoolean(0),
+
+        Color.parseColor(args.getString(1)),
+        Color.parseColor(args.getString(2)),
+        args.getBoolean(3),
+        (float)args.getDouble(4),
+
+        Color.parseColor(args.getString(5)),
+        Color.parseColor(args.getString(6)),
+        (float)args.getDouble(7),
+
+        Color.parseColor(args.getString(8)),
+        Color.parseColor(args.getString(9)),
+        args.getString(10),
+        (float) args.getDouble(11),
+
+        Color.parseColor(args.getString(12)),
+        args.getString(13),
+        (float) args.getDouble(14),
+
+        Color.parseColor(args.getString(15)),
+        Color.parseColor(args.getString(16)),
+        args.getInt(17),
+        args.getInt(18),
+
+        Color.parseColor(args.getString(19)),
+        args.getString(20),
+        (float) args.getDouble(21),
+        Color.parseColor(args.getString(22)),
+        args.getString(23),
+        (float) args.getDouble(24),
+        args.getBoolean(25),
+
+        Color.parseColor(args.getString(26)),
+        args.getString(27),
+        (float) args.getDouble(28),
+        args.getBoolean(29),
+
+        Color.parseColor(args.getString(30)),
+        Color.parseColor(args.getString(31)),
+        args.getString(32),
+        (float) args.getDouble(33),
+
+        Color.parseColor(args.getString(34)),
+        args.getString(35),
+        Color.parseColor(args.getString(36)),
+        args.getBoolean(37),
+
+        args.getInt(38),
+
+        Color.parseColor(args.getString(39)),
+
+        Color.parseColor(args.getString(40)),
+        args.getString(41),
+        (float) args.getDouble(42),
+
+        Color.parseColor(args.getString(43)),
+        args.getString(44),
+        (float) args.getDouble(45)
+      );
+
+      return startAntiSpoofing(asConfig, callbackContext);
     }
     return false;
   }
@@ -149,10 +212,11 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofingActivity.AntiSp
     return true;
   }
 
-  private boolean startAntiSpoofing(CallbackContext callbackContext){
+  private boolean startAntiSpoofing(AntiSpoofiingConfig asConfig, CallbackContext callbackContext){
     startAntiSpoofingCallbackContext = callbackContext;
     final float opacity = Float.parseFloat("1");
     asFragment = new AntiSpoofingActivity();
+    asFragment.asConfig = asConfig;
     asFragment.setEventListener(this);
     cordova.getActivity().runOnUiThread(new Runnable() {
       @Override
@@ -645,5 +709,13 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofingActivity.AntiSp
   @Override
   public void onScanResult(int result) {
     startAntiSpoofingCallbackContext.success(result);
+  }
+
+  @Override
+  public void onAntiSpoofingActivityDestroyed() {
+    FragmentManager fragmentManager = cordova.getActivity().getSupportFragmentManager();
+    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+    fragmentTransaction.remove(asFragment);
+    fragmentTransaction.commit();
   }
 }
