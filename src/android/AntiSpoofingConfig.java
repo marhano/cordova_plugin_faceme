@@ -7,8 +7,8 @@ public class AntiSpoofingConfig {
   //Frame
   public int frameActiveColor;
   public int frameIdleColor;
-  public boolean showFrame;
   public float frameBorderWidth;
+  public boolean showFrame;
 
   //Circle
   public int circleActiveColor;
@@ -77,7 +77,7 @@ public class AntiSpoofingConfig {
 
   public AntiSpoofingConfig(boolean showFPS,
                                int frameActiveColor, int frameIdleColor,
-                               boolean showFrame, float frameBorderWidth,
+                                float frameBorderWidth, boolean showFrame,
                                int circleActiveColor, int circleIdleColor,
                                float circleBorderWidth,
                                int actionDetailHintActiveColor, int actionDetailHintIdleColor, String actionDetailHintFont, float actionDetailHintFontSize,
@@ -95,8 +95,8 @@ public class AntiSpoofingConfig {
     this.showFPS = showFPS;
     this.frameActiveColor = frameActiveColor;
     this.frameIdleColor = frameIdleColor;
-    this.showFrame = showFrame;
     this.frameBorderWidth = frameBorderWidth;
+    this.showFrame = showFrame;
     this.circleActiveColor = circleActiveColor;
     this.circleIdleColor = circleIdleColor;
     this.circleBorderWidth = circleBorderWidth;

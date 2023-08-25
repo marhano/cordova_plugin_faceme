@@ -116,8 +116,8 @@ FaceMe.startAntiSpoofing = function(options, onSuccess, onError){
 
     //User Action Hint
     options.userActionHintColor = options.userActionHintColor || BLACK_COLOR;
-    options.userActionHintFont = options.userActionHintFont || -1;
-    options.userActionHintFontSize = options.userActionHintFontSize || null;
+    options.userActionHintFont = options.userActionHintFont || null;
+    options.userActionHintFontSize = options.userActionHintFontSize || -1;
     options.showUserActionSteps = options.showUserActionSteps || true;
 
     //Speech Number

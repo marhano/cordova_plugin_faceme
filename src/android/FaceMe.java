@@ -142,29 +142,35 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofingActivity.AntiSp
       AntiSpoofingConfig asConfig = new AntiSpoofingConfig(
         args.getBoolean(0),
 
+        //Frame
         Color.parseColor(args.getString(1)),
         Color.parseColor(args.getString(2)),
-        args.getBoolean(3),
-        (float)args.getDouble(4),
+        (float)args.getDouble(3),
+        args.getBoolean(4),
 
+        //Circle
         Color.parseColor(args.getString(5)),
         Color.parseColor(args.getString(6)),
         (float)args.getDouble(7),
 
+        //Action Detail Hint
         Color.parseColor(args.getString(8)),
         Color.parseColor(args.getString(9)),
         args.getString(10),
         (float) args.getDouble(11),
 
+        //Action Hint
         Color.parseColor(args.getString(12)),
         args.getString(13),
         (float) args.getDouble(14),
 
+        //Progress Bar
         Color.parseColor(args.getString(15)),
         Color.parseColor(args.getString(16)),
         args.getInt(17),
         args.getInt(18),
 
+        //Footer
         Color.parseColor(args.getString(19)),
         args.getString(20),
         (float) args.getDouble(21),
@@ -173,29 +179,36 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofingActivity.AntiSp
         (float) args.getDouble(24),
         args.getBoolean(25),
 
+        //User Action Hint
         Color.parseColor(args.getString(26)),
         args.getString(27),
         (float) args.getDouble(28),
         args.getBoolean(29),
 
+        //Speech Number
         Color.parseColor(args.getString(30)),
         Color.parseColor(args.getString(31)),
         args.getString(32),
         (float) args.getDouble(33),
 
+        //Speech Language
         Color.parseColor(args.getString(34)),
         args.getString(35),
         Color.parseColor(args.getString(36)),
         args.getBoolean(37),
 
+        //Alert Position
         args.getInt(38),
 
+        //Alert Background
         Color.parseColor(args.getString(39)),
 
+        //Alert Title
         Color.parseColor(args.getString(40)),
         args.getString(41),
         (float) args.getDouble(42),
 
+        //Alert Description
         Color.parseColor(args.getString(43)),
         args.getString(44),
         (float) args.getDouble(45)
