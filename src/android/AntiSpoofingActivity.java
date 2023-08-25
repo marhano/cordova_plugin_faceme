@@ -1,9 +1,7 @@
 package inc.bastion.faceme;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -22,8 +20,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import com.cyberlink.faceme.DetectionMode;
 import com.cyberlink.faceme.DetectionModelSpeedLevel;
@@ -38,7 +34,6 @@ import com.cyberlink.faceme.FaceMeDataManager;
 import com.cyberlink.faceme.FaceMeRecognizer;
 import com.cyberlink.faceme.FaceMeSdk;
 import com.cyberlink.faceme.LicenseManager;
-import com.cyberlink.faceme.LicenseOption;
 import com.cyberlink.faceme.RecognizerConfig;
 import com.cyberlink.faceme.RecognizerMode;
 import com.cyberlink.faceme.SimilarFaceResult;
@@ -59,8 +54,6 @@ public class AntiSpoofingActivity extends Fragment implements AntiSpoofingCallba
     void onScanResult(int result);
     void onAntiSpoofingActivityDestroyed();
   }
-
-
 
   private AntiSpoofingListener eventListener;
 
@@ -86,7 +79,7 @@ public class AntiSpoofingActivity extends Fragment implements AntiSpoofingCallba
   private TextView txtResultTitle;
   private TextView txtResultSubtitle;
 
-  public AntiSpoofingConfig asConfig;
+  public inc.bastion.faceme.AntiSpoofingConfig asConfig;
 
   private static final long RESULT_FROZEN_PERIOD = 3000L;
 
