@@ -122,14 +122,14 @@ FaceMe.startAntiSpoofing = function(options, onSuccess, onError){
 
     //Speech Number
     options.speechNumberActiveColor = options.speechNumberActiveColor || "#1E90FF"; 
-    options.speechNumberIdleColor = options.speechNumberIdleColor || "888888"; 
+    options.speechNumberIdleColor = options.speechNumberIdleColor || "#888888"; 
     options.speechNumberFont = options.speechNumberFont || null; 
     options.speechNumberFontSize = options.speechNumberFontSize || -1; 
 
     //Speech Language
     options.speechLanguageColor = options.speechLanguageColor || BLACK_COLOR; 
     options.speechLanguageFont = options.speechLanguageFont || null; 
-    options.speechLanguageBackgroundColor = options.speechLanguageBackgroundColor || "DBEEFE"; //nr
+    options.speechLanguageBackgroundColor = options.speechLanguageBackgroundColor || "#DBEEFE"; //nr
     options.showSpeechLanguage = options.showSpeechLanguage || true; 
 
     //Alert Position
