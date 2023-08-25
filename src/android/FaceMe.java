@@ -38,6 +38,7 @@ import com.cyberlink.faceme.SimilarFaceResult;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.util.Base64;
 import android.content.Context;
@@ -46,13 +47,19 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.util.Size;
 import android.graphics.BitmapFactory;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.widget.FrameLayout;
 
 import androidx.annotation.WorkerThread;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
-public class FaceMe extends CordovaPlugin {
+public class FaceMe extends CordovaPlugin implements AntiSpoofingActivity.AntiSpoofingListener {
   private static final String TAG = "FaceMe";
 
-  private static final String LICENSE_KEY = "olJ5ziHGlU3FIHWZhhCAq27xJ70q4aMx1lVTK8TI";
+  private static String LICENSE_KEY = "";
   private boolean isLicenseActivated = false;
   private ExecutorService sdkThread;
 
@@ -71,7 +78,6 @@ public class FaceMe extends CordovaPlugin {
   private static final String START_ANTI_SPOOFING = "startAntiSpoofing";
 
   private CallbackContext startAntiSpoofingCallbackContext;
-  private static final int ANTI_SPOOFING_REQUEST_CODE = 123;
 
   private FaceHolder _tempHolder;
   private FaceHolder _faceHolder;
@@ -82,9 +88,14 @@ public class FaceMe extends CordovaPlugin {
   private int maxFrameHeight = 1280;
   private int maxFrameWidth = 720;
 
+  private ViewParent webViewParent;
+  private AntiSpoofingActivity asFragment;
+  private int containerViewId = 20;
+  private boolean toBack = true;
+
   public FaceMe(){
-      super();
-      Log.d(TAG, "Loading");
+    super();
+    Log.d(TAG, "Loading");
   }
 
   @Override
@@ -92,9 +103,11 @@ public class FaceMe extends CordovaPlugin {
     if(TEST_PLUGIN.equals(action)){
       return testPlugin(callbackContext);
     }else if(INITIALIZE_SDK.equals(action)){
-      return initializeSDK(callbackContext);
+      String licenseKey = args.getString(0);
+      return initializeSDK(licenseKey, callbackContext);
     }else if(ACTIVATE_LICENSE.equals(action)){
-      cordova.getThreadPool().execute(() -> activateLicense(callbackContext));
+      String licenseKey = args.getString(0);
+      cordova.getThreadPool().execute(() -> activateLicense(licenseKey, callbackContext));
       return true;
     }else if(DEACTIVATE_LICENSE.equals(action)){
       cordova.getThreadPool().execute(() -> deactivateLicense(callbackContext));
@@ -126,49 +139,161 @@ public class FaceMe extends CordovaPlugin {
       String username = args.getString(0);
       return addFace(username, callbackContext);
     }else if(START_ANTI_SPOOFING.equals(action)){
-      return startAntiSpoofing(callbackContext);
+      AntiSpoofingConfig asConfig = new AntiSpoofingConfig(
+        args.getBoolean(0),
+
+        //Frame
+        Color.parseColor(args.getString(1)),
+        Color.parseColor(args.getString(2)),
+        (float)args.getDouble(3),
+        args.getBoolean(4),
+
+        //Circle
+        Color.parseColor(args.getString(5)),
+        Color.parseColor(args.getString(6)),
+        (float)args.getDouble(7),
+
+        //Action Detail Hint
+        Color.parseColor(args.getString(8)),
+        Color.parseColor(args.getString(9)),
+        args.getString(10),
+        (float) args.getDouble(11),
+
+        //Action Hint
+        Color.parseColor(args.getString(12)),
+        args.getString(13),
+        (float) args.getDouble(14),
+
+        //Progress Bar
+        Color.parseColor(args.getString(15)),
+        Color.parseColor(args.getString(16)),
+        args.getInt(17),
+        args.getInt(18),
+
+        //Footer
+        Color.parseColor(args.getString(19)),
+        args.getString(20),
+        (float) args.getDouble(21),
+        Color.parseColor(args.getString(22)),
+        args.getString(23),
+        (float) args.getDouble(24),
+        args.getBoolean(25),
+
+        //User Action Hint
+        Color.parseColor(args.getString(26)),
+        args.getString(27),
+        (float) args.getDouble(28),
+        args.getBoolean(29),
+
+        //Speech Number
+        Color.parseColor(args.getString(30)),
+        Color.parseColor(args.getString(31)),
+        args.getString(32),
+        (float) args.getDouble(33),
+
+        //Speech Language
+        Color.parseColor(args.getString(34)),
+        args.getString(35),
+        Color.parseColor(args.getString(36)),
+        args.getBoolean(37),
+
+        //Alert Position
+        args.getInt(38),
+
+        //Alert Background
+        Color.parseColor(args.getString(39)),
+
+        //Alert Title
+        Color.parseColor(args.getString(40)),
+        args.getString(41),
+        (float) args.getDouble(42),
+
+        //Alert Description
+        Color.parseColor(args.getString(43)),
+        args.getString(44),
+        (float) args.getDouble(45)
+      );
+
+      return startAntiSpoofing(asConfig, callbackContext);
     }
     return false;
-  }
-
-  @Override
-  public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    super.onActivityResult(requestCode, resultCode, data);
-
-    if (requestCode == ANTI_SPOOFING_REQUEST_CODE) {
-      if (resultCode == Activity.RESULT_OK) {
-        boolean hasSimilarFace = data.getBooleanExtra("hasSimilarFace", false);
-        startAntiSpoofingCallbackContext.success(hasSimilarFace ? 1 : 0); // Return 1 for true, 0 for false
-      } else {
-        startAntiSpoofingCallbackContext.error("Anti-spoofing activity result canceled or failed");
-      }
-    }
   }
 
   private boolean testPlugin(CallbackContext callbackContext){
     startAntiSpoofingCallbackContext = callbackContext;
 
-    cordova.getActivity().runOnUiThread(() -> {
-      Intent intent = new Intent(cordova.getActivity(), AntiSpoofingActivity.class);
-      cordova.startActivityForResult(this, intent, ANTI_SPOOFING_REQUEST_CODE);
-    });
-
     return true;
   }
 
-  private boolean startAntiSpoofing(CallbackContext callbackContext){
+  private boolean startAntiSpoofing(AntiSpoofingConfig asConfig, CallbackContext callbackContext){
     startAntiSpoofingCallbackContext = callbackContext;
+    final float opacity = Float.parseFloat("1");
+    asFragment = new AntiSpoofingActivity();
+    asFragment.asConfig = asConfig;
+    asFragment.setEventListener(this);
+    cordova.getActivity().runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        //create or update the layout params for the container view
+        FrameLayout containerView = (FrameLayout)cordova.getActivity().findViewById(containerViewId);
+        if(containerView == null){
+          containerView = new FrameLayout(cordova.getActivity().getApplicationContext());
+          containerView.setId(containerViewId);
 
-    cordova.getActivity().runOnUiThread(() -> {
-      Intent intent = new Intent(cordova.getActivity(), AntiSpoofingActivity.class);
-      cordova.startActivityForResult(this, intent, ANTI_SPOOFING_REQUEST_CODE);
+          FrameLayout.LayoutParams containerLayoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+          cordova.getActivity().addContentView(containerView, containerLayoutParams);
+        }
+
+        //display camera below the webview
+        if(toBack){
+          View view = webView.getView();
+          ViewParent rootParent = containerView.getParent();
+          ViewParent curParent = view.getParent();
+
+          view.setBackgroundColor(0x00000000);
+
+          // If parents do not match look for.
+          if(curParent.getParent() != rootParent) {
+            while(curParent != null && curParent.getParent() != rootParent) {
+              curParent = curParent.getParent();
+            }
+
+            if(curParent != null) {
+              ((ViewGroup)curParent).setBackgroundColor(0x00000000);
+              ((ViewGroup)curParent).bringToFront();
+            } else {
+              // Do default...
+              curParent = view.getParent();
+              webViewParent = curParent;
+              ((ViewGroup)view).bringToFront();
+            }
+          }else{
+            // Default
+            webViewParent = curParent;
+            ((ViewGroup)curParent).bringToFront();
+          }
+
+        }else{
+          //set view back to front
+          containerView.setAlpha(opacity);
+          containerView.bringToFront();
+        }
+
+
+        FragmentManager fragmentManager = cordova.getActivity().getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.add(containerView.getId(), asFragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+      }
     });
 
     return true;
   }
 
-  private boolean initializeSDK(CallbackContext callbackContext){
+  private boolean initializeSDK(String licenseKey, CallbackContext callbackContext){
     Context context = this.cordova.getActivity().getApplicationContext();
+    LICENSE_KEY = licenseKey;
     FaceMeSdk.initialize(context, LICENSE_KEY);
 
     LicenseManager licenseManager = new LicenseManager();
@@ -178,8 +303,11 @@ public class FaceMe extends CordovaPlugin {
 
     if(result == 0){
       initSdkComponents();
+      callbackContext.success(result);
+    }else{
+      callbackContext.error(result);
     }
-    callbackContext.success(result);
+
     return true;
   }
 
@@ -359,12 +487,13 @@ public class FaceMe extends CordovaPlugin {
     FaceMeSdk.initialize(context, LICENSE_KEY);
     int isDeactivated = licenseUtils.deactivateLicense();
     if(isDeactivated == 0){
-        isLicenseActivated = false;
+      isLicenseActivated = false;
     }
     callbackContext.success(isDeactivated);
   }
 
-  private void activateLicense(CallbackContext callbackContext){
+  private void activateLicense(String licenseKey, CallbackContext callbackContext){
+    LICENSE_KEY = licenseKey;
     Context context = this.cordova.getActivity().getApplicationContext();
     LicenseUtils licenseUtils = new LicenseUtils();
     FaceMeSdk.initialize(context, LICENSE_KEY);
@@ -590,4 +719,16 @@ public class FaceMe extends CordovaPlugin {
     return Base64.encodeToString(imageBytes, Base64.DEFAULT);
   }
 
+  @Override
+  public void onScanResult(int result) {
+    startAntiSpoofingCallbackContext.success(result);
+  }
+
+  @Override
+  public void onAntiSpoofingActivityDestroyed() {
+    FragmentManager fragmentManager = cordova.getActivity().getSupportFragmentManager();
+    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+    fragmentTransaction.remove(asFragment);
+    fragmentTransaction.commit();
+  }
 }
