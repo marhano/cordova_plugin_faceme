@@ -76,6 +76,9 @@ FaceMe.startAntiSpoofing = function(options, onSuccess, onError){
     const BLACK_COLOR = "#000000"
     const BORDER_FONT = 3.3;
 
+    options.faceDetection = options.faceDetection || false;
+    options.faceEnroll = options.faceEnroll || false;
+
     options.showFPS = options.showFPS || false;
 
     options.frameActiveColor = options.frameActiveColor || ACTIVE_COLOR;
@@ -149,7 +152,7 @@ FaceMe.startAntiSpoofing = function(options, onSuccess, onError){
     options.alertDescriptionFontSize = options.alertDescriptionFontSize || -1;
 
     exec(onSuccess, onError, PLUGIN_NAME, "startAntiSpoofing", [
-        options.showFPS = options.showFPS,
+        options.showFPS,
 
         options.frameActiveColor,
         options.frameIdleColor,
@@ -220,6 +223,10 @@ FaceMe.startAntiSpoofing = function(options, onSuccess, onError){
         options.alertDescriptionColor,
         options.alertDescriptionFont,
         options.alertDescriptionFontSize,
+
+        //Detection Type
+        options.faceDetection,
+        options.faceEnroll,
     ]);
 };
 

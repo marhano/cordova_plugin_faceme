@@ -7,11 +7,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,13 +34,16 @@ import com.cyberlink.faceme.EnginePreference;
 import com.cyberlink.faceme.ExtractConfig;
 import com.cyberlink.faceme.ExtractionModelSpeedLevel;
 import com.cyberlink.faceme.ExtractionOption;
+import com.cyberlink.faceme.FaceAttribute;
 import com.cyberlink.faceme.FaceFeature;
 import com.cyberlink.faceme.FaceInfo;
+import com.cyberlink.faceme.FaceLandmark;
 import com.cyberlink.faceme.FaceMeDataManager;
 import com.cyberlink.faceme.FaceMeRecognizer;
 import com.cyberlink.faceme.FaceMeSdk;
 import com.cyberlink.faceme.LicenseManager;
 import com.cyberlink.faceme.LicenseOption;
+import com.cyberlink.faceme.PrecisionLevel;
 import com.cyberlink.faceme.RecognizerConfig;
 import com.cyberlink.faceme.RecognizerMode;
 import com.cyberlink.faceme.SimilarFaceResult;
@@ -48,6 +53,8 @@ import com.cyberlink.faceme.widget.AntiSpoofingConfig;
 import com.cyberlink.faceme.widget.AntiSpoofingFragment;
 import com.cyberlink.faceme.widget.LocalizedKey;
 
+import org.json.JSONException;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -56,15 +63,13 @@ import java.util.concurrent.Executors;
 
 public class AntiSpoofingActivity extends Fragment implements AntiSpoofingCallbackV2{
   public interface AntiSpoofingListener{
-    void onScanResult(int result);
+    void onFaceDetection(int result);
+    void onFaceEnroll(FaceHolder enrollFace) throws JSONException;
   }
-
-
-
   private AntiSpoofingListener eventListener;
-
   private View view;
   private String appResourcePackage;
+  private  FaceHolder _faceHolder;
 
   private static final String LICENSE_KEY = "gaa6ER882dGwuu2OB4YhGQoh5CU7A89IYzsZC5cS";
   private static final int PERMISSION_REQUEST_CODE = 12345;
@@ -197,7 +202,13 @@ public class AntiSpoofingActivity extends Fragment implements AntiSpoofingCallba
 
       _extractConfig = new ExtractConfig();
       _extractConfig.extractBoundingBox = true;
+      _extractConfig.extractFeatureLandmark = true;
       _extractConfig.extractFeature = true;
+      _extractConfig.extractAge = true;
+      _extractConfig.extractGender = true;
+      _extractConfig.extractEmotion = true;
+      _extractConfig.extractPose = true;
+      _extractConfig.extractOcclusion = true;
     } catch (Exception e) {
       if (recognizer != null) recognizer.release();
       throw e;
@@ -400,30 +411,74 @@ public class AntiSpoofingActivity extends Fragment implements AntiSpoofingCallba
     txtResultTitle.setText("");
     resultLayoutView.setVisibility(View.VISIBLE);
     txtResultSubtitle.setVisibility(View.GONE);
-    int facesCount = _recognizer.extractFace(_extractConfig, Collections.singletonList(bitmap));
-    if (facesCount > 0) {
-      ArrayList<FaceHolder> faces = new ArrayList<>();
-      for (int faceIndex = 0; faceIndex < facesCount; faceIndex++) {
-        FaceFeature faceFeature = _recognizer.getFaceFeature(0, faceIndex);
-
-        List<SimilarFaceResult> searchResult = _dataManager.searchSimilarFace(confidenceThreshold, -1, faceFeature, 1);
-        if (searchResult != null && !searchResult.isEmpty()) {
-          if(result == AntiSpoofingCallbackV2.UI_RESULT_SHAKEN){
-            txtResultTitle.setText(getString(getActivity().getResources().getIdentifier("demo_fm_2das_result_shaken", "string", appResourcePackage)));
-          }else if(result == AntiSpoofingCallbackV2.UI_RESULT_SPOOFING){
-            txtResultTitle.setText(getString(getActivity().getResources().getIdentifier("demo_fm_2das_result_spoofing", "string", appResourcePackage)));
-          }else{
-            eventListener.onScanResult(1);
-          }
+    try {
+      extractFaceFromImage(bitmap);
+      FaceHolder holder = _faceHolder;
+      if(checkSimilarFace(holder)){
+        if(asConfig.faceEnroll){
+          eventListener.onFaceEnroll(null);
+        }else if(asConfig.faceDetection){
+          eventListener.onFaceDetection(1);
+        }
+      }else{
+        if(result == AntiSpoofingCallbackV2.UI_RESULT_SHAKEN){
+          txtResultTitle.setText(getString(getActivity().getResources().getIdentifier("demo_fm_2das_result_shaken", "string", appResourcePackage)));
+        }else if(result == AntiSpoofingCallbackV2.UI_RESULT_SPOOFING){
+          txtResultTitle.setText(getString(getActivity().getResources().getIdentifier("demo_fm_2das_result_spoofing", "string", appResourcePackage)));
         }else{
-          eventListener.onScanResult(0);
-          mainHandler.removeCallbacks(finishResultPage);
-          mainHandler.postDelayed(finishResultPage, RESULT_FROZEN_PERIOD);
+          if(asConfig.faceEnroll){
+            eventListener.onFaceEnroll(holder);
+          }else if(asConfig.faceDetection){
+            eventListener.onFaceDetection(0);
+          }
         }
       }
-
-
+      mainHandler.removeCallbacks(finishResultPage);
+      mainHandler.postDelayed(finishResultPage, RESULT_FROZEN_PERIOD);
       asFragment.enableTestDump(false);
+    }catch (JSONException e){
+      e.printStackTrace();
+    }
+  }
+  private Bitmap getCropFaceBitmap(Bitmap source, Rect faceRect) {
+    Size maxSize = new Size(source.getWidth(), source.getHeight());
+    Rect enlargeRect = RectUtil.enlargeRect(faceRect, maxSize, 0.25f);
+    Rect squareRect = RectUtil.squareRect(enlargeRect, maxSize);
+    return Bitmap.createBitmap(source, squareRect.left, squareRect.top, squareRect.width(), squareRect.height());
+  }
+
+  private boolean checkSimilarFace(FaceHolder faceHolder){
+    if(_dataManager == null) return false;
+    float confidenceThreshold = _dataManager.getPrecisionThreshold(PrecisionLevel.LEVEL_1E6);
+
+    List<SimilarFaceResult> searchResult = _dataManager.searchSimilarFace(confidenceThreshold, -1, faceHolder.faceFeature, 1);
+    if(searchResult != null && !searchResult.isEmpty()){
+      SimilarFaceResult result = searchResult.get(0);
+      faceHolder.data.collectionId = result.collectionId;
+      faceHolder.data.faceId = result.faceId;
+      faceHolder.data.confidence = result.confidence;
+    }
+
+    if(faceHolder.data.collectionId > 0){
+      faceHolder.data.name = _dataManager.getFaceCollectionName(faceHolder.data.collectionId);
+      return true;
+    }
+    return false;
+  }
+
+  private void extractFaceFromImage(Bitmap bitmap){
+    int facesCount = _recognizer.extractFace(_extractConfig, Collections.singletonList(bitmap));
+    if (facesCount > 0) {
+      FaceInfo faceInfo = _recognizer.getFaceInfo(0, 0);
+      FaceLandmark landmark = _recognizer.getFaceLandmark(0, 0);
+      FaceAttribute attribute = _recognizer.getFaceAttribute(0, 0);
+      FaceFeature faceFeature = _recognizer.getFaceFeature(0, 0);
+
+      Bitmap faceImage = getCropFaceBitmap(bitmap, faceInfo.boundingBox);
+      FaceHolder face = new FaceHolder(faceInfo, landmark, attribute, faceFeature, faceImage);
+      _faceHolder = face;
+    }else{
+      _faceHolder = null;
     }
   }
 }
