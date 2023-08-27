@@ -57,7 +57,6 @@ import java.util.concurrent.Executors;
 public class AntiSpoofingActivity extends Fragment implements AntiSpoofingCallbackV2{
   public interface AntiSpoofingListener{
     void onScanResult(int result);
-    void onAntiSpoofingActivityDestroyed();
   }
 
 
@@ -415,7 +414,6 @@ public class AntiSpoofingActivity extends Fragment implements AntiSpoofingCallba
             txtResultTitle.setText(getString(getActivity().getResources().getIdentifier("demo_fm_2das_result_spoofing", "string", appResourcePackage)));
           }else{
             eventListener.onScanResult(1);
-            eventListener.onAntiSpoofingActivityDestroyed();
           }
         }else{
           eventListener.onScanResult(0);

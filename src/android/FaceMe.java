@@ -3,6 +3,7 @@ package inc.bastion.faceme;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
 
+import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -76,6 +77,7 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofingActivity.AntiSp
   private static final String SELECT_FACE = "selectFace";
   private static final String ADD_FACE = "addFace";
   private static final String START_ANTI_SPOOFING = "startAntiSpoofing";
+  private static final String STOP_ANTI_SPOOFING = "stopAntiSpoofing";
 
   private CallbackContext startAntiSpoofingCallbackContext;
 
@@ -215,6 +217,8 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofingActivity.AntiSp
       );
 
       return startAntiSpoofing(asConfig, callbackContext);
+    }else if(STOP_ANTI_SPOOFING.equals(action)){
+      return stopAntiSpoofing(callbackContext);
     }
     return false;
   }
@@ -288,6 +292,16 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofingActivity.AntiSp
       }
     });
 
+    return true;
+  }
+
+  private boolean stopAntiSpoofing(CallbackContext callbackContext){
+    FragmentManager fragmentManager = cordova.getActivity().getSupportFragmentManager();
+    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+    fragmentTransaction.remove(asFragment);
+    fragmentTransaction.commit();
+
+    callbackContext.success();
     return true;
   }
 
@@ -722,13 +736,5 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofingActivity.AntiSp
   @Override
   public void onScanResult(int result) {
     startAntiSpoofingCallbackContext.success(result);
-  }
-
-  @Override
-  public void onAntiSpoofingActivityDestroyed() {
-    FragmentManager fragmentManager = cordova.getActivity().getSupportFragmentManager();
-    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-    fragmentTransaction.remove(asFragment);
-    fragmentTransaction.commit();
   }
 }

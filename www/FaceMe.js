@@ -223,4 +223,8 @@ FaceMe.startAntiSpoofing = function(options, onSuccess, onError){
     ]);
 };
 
+FaceMe.stopAntiSpoofing = function(onSuccess, onError){
+  exec(onSuccess, onError, PLUGIN_NAME, "stopAntiSpoofing", []);  
+};
+
 module.exports = FaceMe;
