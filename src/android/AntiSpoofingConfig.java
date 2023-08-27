@@ -75,6 +75,9 @@ public class AntiSpoofingConfig {
   public String alertDescriptionFont;
   public float alertDescriptionFontSize;
 
+  public boolean faceDetection;
+  public boolean faceEnroll;
+
   public AntiSpoofingConfig(boolean showFPS,
                                int frameActiveColor, int frameIdleColor,
                                 float frameBorderWidth, boolean showFrame,
@@ -90,7 +93,7 @@ public class AntiSpoofingConfig {
                                int speechLanguageColor, String speechLanguageFont, int speechLanguageBackgroundColor, boolean showSpeechLanguage,
                                int alertDistanceToCircle, int alertBackgroundColor,
                                int alertTitleColor, String alertTitleFont, float alertTitleFontSize,
-                               int alertDescriptionColor, String alertDescriptionFont, float alertDescriptionFontSize) {
+                               int alertDescriptionColor, String alertDescriptionFont, float alertDescriptionFontSize, boolean faceDetection, boolean faceEnroll) {
     // Initialize all the variables here
     this.showFPS = showFPS;
     this.frameActiveColor = frameActiveColor;
@@ -138,5 +141,7 @@ public class AntiSpoofingConfig {
     this.alertDescriptionColor = alertDescriptionColor;
     this.alertDescriptionFont = alertDescriptionFont;
     this.alertDescriptionFontSize = alertDescriptionFontSize;
+    this.faceDetection = faceDetection;
+    this.faceEnroll = faceEnroll;
   }
 }

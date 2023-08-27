@@ -3,6 +3,7 @@ package inc.bastion.faceme;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
 
+import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -76,6 +77,7 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofingActivity.AntiSp
   private static final String SELECT_FACE = "selectFace";
   private static final String ADD_FACE = "addFace";
   private static final String START_ANTI_SPOOFING = "startAntiSpoofing";
+  private static final String STOP_ANTI_SPOOFING = "stopAntiSpoofing";
 
   private CallbackContext startAntiSpoofingCallbackContext;
 
@@ -211,10 +213,16 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofingActivity.AntiSp
         //Alert Description
         Color.parseColor(args.getString(43)),
         args.getString(44),
-        (float) args.getDouble(45)
+        (float) args.getDouble(45),
+
+        //Detection Type
+        args.getBoolean(46),
+        args.getBoolean(47)
       );
 
       return startAntiSpoofing(asConfig, callbackContext);
+    }else if(STOP_ANTI_SPOOFING.equals(action)){
+      return stopAntiSpoofing(callbackContext);
     }
     return false;
   }
@@ -288,6 +296,19 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofingActivity.AntiSp
       }
     });
 
+    return true;
+  }
+
+  private boolean stopAntiSpoofing(CallbackContext callbackContext){
+//    if(startAntiSpoofingCallbackContext != null){
+//      startAntiSpoofingCallbackContext.success();
+//    }
+    FragmentManager fragmentManager = cordova.getActivity().getSupportFragmentManager();
+    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+    fragmentTransaction.remove(asFragment);
+    fragmentTransaction.commit();
+
+    callbackContext.success();
     return true;
   }
 
@@ -398,6 +419,9 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofingActivity.AntiSp
     JSONObject faceHolderObject = convertToJsonArray(holder);
     _tempHolder = null;
     callbackContext.success(faceHolderObject);
+    if(startAntiSpoofingCallbackContext != null){
+      startAntiSpoofingCallbackContext.success();
+    }
 
     return true;
   }
@@ -720,15 +744,27 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofingActivity.AntiSp
   }
 
   @Override
-  public void onScanResult(int result) {
-    startAntiSpoofingCallbackContext.success(result);
+  public void onFaceDetection(int result) {
+    if(result == 0){
+      PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, result);
+      pluginResult.setKeepCallback(true);
+      startAntiSpoofingCallbackContext.sendPluginResult(pluginResult);
+    }else{
+      startAntiSpoofingCallbackContext.success(result);
+    }
   }
 
   @Override
-  public void onAntiSpoofingActivityDestroyed() {
-    FragmentManager fragmentManager = cordova.getActivity().getSupportFragmentManager();
-    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-    fragmentTransaction.remove(asFragment);
-    fragmentTransaction.commit();
+  public void onFaceEnroll(FaceHolder enrollFace) throws JSONException  {
+    if(enrollFace != null){
+      _tempHolder = enrollFace;
+      PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, convertToJsonArray(_tempHolder));
+      pluginResult.setKeepCallback(true);
+      startAntiSpoofingCallbackContext.sendPluginResult(pluginResult);
+    }else{
+      PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, 0);
+      pluginResult.setKeepCallback(true);
+      startAntiSpoofingCallbackContext.sendPluginResult(pluginResult);
+    }
   }
 }
