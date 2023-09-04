@@ -333,18 +333,35 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofingActivity.AntiSp
   }
 
   private void detectFace(String base64Image, CallbackContext callbackContext) throws JSONException{
-    Bitmap bitmap = base64ToBitmap(base64Image);
-    if(_recognizer == null || bitmap.getHeight() != maxFrameHeight || bitmap.getHeight() != maxFrameWidth){
-      maxFrameHeight = bitmap.getHeight();
-      maxFrameWidth = bitmap.getWidth();
-      releaseRecognizer();
-      initRecognizer();
-    }
-    JSONObject jsonObjectFaceHolder = extractFace(bitmap);
+    cordova.getThreadPool().execute(new Runnable() {
+      @Override
+      public void run() {
+        try{
+          Bitmap bitmap = base64ToBitmap(base64Image);
+          if(_recognizer == null || bitmap.getHeight() != maxFrameHeight || bitmap.getHeight() != maxFrameWidth){
+            maxFrameHeight = bitmap.getHeight();
+            maxFrameWidth = bitmap.getWidth();
+            releaseRecognizer();
+            initRecognizer();
+          }
+          extractFaceFromImage(bitmap);
+          FaceHolder holder = _faceHolder;
 
-    if(isLicenseActivated && jsonObjectFaceHolder != null){
-      callbackContext.success(jsonObjectFaceHolder);
-    }
+          if(checkSimilarFace(holder)){
+            callbackContext.success(0);
+          }else{
+            callbackContext.success(1);
+          }
+        }catch (JSONException e){
+          e.printStackTrace();
+        }
+      }
+      //    JSONObject jsonObjectFaceHolder = extractFace(bitmap);
+//
+//    if(isLicenseActivated && jsonObjectFaceHolder != null){
+//      callbackContext.success(jsonObjectFaceHolder);
+//    }
+    });
   }
 
   private void enrollFace(String base64Image, CallbackContext callbackContext) throws JSONException{
