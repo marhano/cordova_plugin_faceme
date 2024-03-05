@@ -71,7 +71,7 @@ public class AntiSpoofingActivity extends Fragment implements AntiSpoofingCallba
   private String appResourcePackage;
   private  FaceHolder _faceHolder;
 
-  private static final String LICENSE_KEY = "gaa6ER882dGwuu2OB4YhGQoh5CU7A89IYzsZC5cS";
+  //private static final String LICENSE_KEY = "gaa6ER882dGwuu2OB4YhGQoh5CU7A89IYzsZC5cS";
   private static final int PERMISSION_REQUEST_CODE = 12345;
   private final String TAG = "AntiSpoofingActivity";
   private AntiSpoofingFragment asFragment;
@@ -91,6 +91,7 @@ public class AntiSpoofingActivity extends Fragment implements AntiSpoofingCallba
   private TextView txtResultSubtitle;
 
   public inc.bastion.faceme.AntiSpoofingConfig asConfig;
+  public String LICENSE_KEY;
 
   private static final long RESULT_FROZEN_PERIOD = 3000L;
 
@@ -229,7 +230,6 @@ public class AntiSpoofingActivity extends Fragment implements AntiSpoofingCallba
       throw e;
     }
   }
-
   @WorkerThread
   private void releaseSdkEngine() {
     hasRecognitionFeature = false;
@@ -284,8 +284,8 @@ public class AntiSpoofingActivity extends Fragment implements AntiSpoofingCallba
     layoutSetting.localizedStrings.put(LocalizedKey.AS_SPEECH_LANGUAGE_MANDARIN, getString(getActivity().getResources().getIdentifier("demo_fm_2das_speech_language_mandarin", "string", appResourcePackage)));
     layoutSetting.localizedStrings.put(LocalizedKey.AS_SPEECH_LANGUAGE_ENGLISH, getString(getActivity().getResources().getIdentifier("demo_fm_2das_speech_language_english", "string", appResourcePackage)));
 
-    Typeface exoBold = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/font/Exo 2/Exo2-Bold.ttf");
-    Typeface exoRegular = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/font/Exo 2/Exo2-Regular.ttf");
+//    Typeface exoBold = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/font/Exo 2/Exo2-Bold.ttf");
+//    Typeface exoRegular = Typeface.createFromAsset(getActivity().getAssets(), "www/assets/font/Exo 2/Exo2-Regular.ttf");
 
     Typeface tfActionHintFont = null;
     Typeface tfActionDetailHintFont = null;

@@ -237,6 +237,7 @@ public class FaceMe extends CordovaPlugin implements AntiSpoofingActivity.AntiSp
     startAntiSpoofingCallbackContext = callbackContext;
     final float opacity = Float.parseFloat("1");
     asFragment = new AntiSpoofingActivity();
+    asFragment.LICENSE_KEY = LICENSE_KEY;
     asFragment.asConfig = asConfig;
     asFragment.setEventListener(this);
     cordova.getActivity().runOnUiThread(new Runnable() {
